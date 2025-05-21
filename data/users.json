@@ -105,5 +105,13 @@
     "email": "minhtuantran210305@gmail.com",
     "password": "$2b$10$qPYAxxBjm0UK5mnPO70Xneg9YP1aE22WgTBgKvb2Bt7ReBpaqoT8C",
     "createdAt": "2025-05-21T04:56:18.078Z"
+  },
+  {
+    "id": "9a1bf83d-886d-4476-8384-ea34932364ce",
+    "ten": "Phạm Hải Đăng",
+    "sdt": "0369066504",
+    "email": "dang2mui@gmail.com",
+    "password": "$2b$10$ecj4HFSWWl/ALj6c.zByv.KyRGofWEWfO/X4jPrVs7igZMDk7fMru",
+    "createdAt": "2025-05-21T06:34:19.362Z"
   }
 ]
