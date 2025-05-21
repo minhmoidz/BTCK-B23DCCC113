@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Typography, Row, Col, Select, Button, Space, Divider, Tooltip } from 'antd';
-import { BellOutlined, InfoCircleOutlined, RobotOutlined } from '@ant-design/icons';
+import React, { useEffect, useState } from 'react';
+import { Typography, Row, Col, Select, Button, Space, Divider, Tooltip, Spin, message } from 'antd';
+import { InfoCircleOutlined, RobotOutlined } from '@ant-design/icons';
 import RootLayout from '../../component/dunglai/RootLayout';
 import { useNavigate } from 'react-router-dom';
 import TopMajorsBanner from '../../component/dunglai/TopMajorsBanner';
@@ -11,14 +11,40 @@ const { Title, Paragraph, Text } = Typography;
 const { Option } = Select;
 
 interface DashboardProps {
-  username: string;
+  userId: string;        // Nhận userId thay vì username
   onLogout: () => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ username, onLogout }) => {
+const Dashboard: React.FC<DashboardProps> = ({ userId, onLogout }) => {
   const navigate = useNavigate();
   const [programType, setProgramType] = useState('Chính quy');
   const [year, setYear] = useState('2024');
+  const [username, setUsername] = useState<string>('User');
+  const [loadingUser, setLoadingUser] = useState<boolean>(true);
+
+  useEffect(() => {
+    async function fetchUserName() {
+      setLoadingUser(true);
+      try {
+        const res = await fetch(`http://localhost:3000/api/user/${userId}`);
+        if (!res.ok) throw new Error('Không thể lấy thông tin người dùng');
+        const data = await res.json();
+        if (data.ten) setUsername(data.ten);
+        else setUsername('User');
+      } catch (error) {
+        message.error('Lấy tên người dùng thất bại');
+        setUsername('User');
+      } finally {
+        setLoadingUser(false);
+      }
+    }
+    if (userId) {
+      fetchUserName();
+    } else {
+      setUsername('User');
+      setLoadingUser(false);
+    }
+  }, [userId]);
 
   return (
     <RootLayout username={username} onLogout={onLogout}>
@@ -34,11 +60,15 @@ const Dashboard: React.FC<DashboardProps> = ({ username, onLogout }) => {
           textAlign: 'center',
         }}
       >
-        <Title level={1} style={{ fontWeight: 700, marginBottom: 12 }}>
-          Xin chào, {username.toUpperCase()} <span role="img" aria-label="wave">👋</span>
-        </Title>
+        {loadingUser ? (
+          <Spin size="large" />
+        ) : (
+          <Title level={1} style={{ fontWeight: 700, marginBottom: 12 }}>
+            Xin chào, {username.toUpperCase()} <span role="img" aria-label="wave">👋</span>
+          </Title>
+        )}
         <Paragraph style={{ fontSize: 18, color: '#555', maxWidth: 720, margin: '0 auto 32px' }}>
-          Chào mừng bạn đến với hệ thống xét tuyển trực tuyến . Vui lòng chọn loại hình đào tạo và năm học để tiếp tục.
+          Chào mừng bạn đến với hệ thống xét tuyển trực tuyến. Vui lòng chọn loại hình đào tạo và năm học để tiếp tục.
         </Paragraph>
         <Space size="large" wrap style={{ justifyContent: 'center' }}>
           <Select

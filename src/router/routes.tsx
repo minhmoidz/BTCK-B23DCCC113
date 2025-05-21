@@ -1,6 +1,5 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import LoginRegister from '../component/login/index';
 import Home from '../pages/trangchu/Home';
 import Dashboard from '../pages/dashboard/Dashboard';
 import MajorDetail from '../pages/nganhhoc/MajorDetail';
@@ -8,6 +7,9 @@ import ChatPage from '../pages/hotro/chatbot';
 import XetTuyen from '../pages/xettuyen/XetTuyen';
 import ThanhToan from '../pages/thanhtoan/ThanhToan';
 import TheoDoiHoSoTraCuu from '../pages/tracuu/TraCuu';
+import SimpleAuthPage from '../component/login';
+import AdminPage from '../pages/admin/AdminPage';
+
 
 interface RouterProps {
   loggedInUser: string | null;
@@ -26,12 +28,15 @@ const Router: React.FC<RouterProps> = ({ loggedInUser, onLogin, onLogout }) => (
           loggedInUser ? (
             <Navigate to="/dashboard" replace />
           ) : (
-            <LoginRegister onLogin={onLogin} />
+            <SimpleAuthPage onLogin={onLogin} />
           )
         }
       />
       <Route path="/major/:slug" element={<MajorDetail />} />
       <Route path="/chat" element={<ChatPage />} />
+
+      {/* Trang Admin */}
+      <Route path="/admin" element={<AdminPage />} />
 
       {/* Trang Dashboard riêng biệt */}
       <Route
@@ -44,14 +49,13 @@ const Router: React.FC<RouterProps> = ({ loggedInUser, onLogin, onLogout }) => (
           )
         }
       />
-
       {/* Các trang dịch vụ riêng biệt, không phải route con */}
       <Route
         path="/xettuyen"
         element={
           loggedInUser ? <XetTuyen username={''} onLogout={function (): void {
             throw new Error('Function not implemented.');
-          } } /> : <Navigate to="/login" replace />
+          }} /> : <Navigate to="/login" replace />
         }
       />
       <Route
@@ -66,7 +70,6 @@ const Router: React.FC<RouterProps> = ({ loggedInUser, onLogin, onLogout }) => (
           loggedInUser ? <ThanhToan /> : <Navigate to="/login" replace />
         }
       />
-
       {/* Route fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

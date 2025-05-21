@@ -10,16 +10,15 @@ import {
   Card,
   notification,
   Spin,
-  Space
+  message
 } from 'antd';
 import { UploadOutlined, SendOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import locale from 'antd/es/date-picker/locale/vi_VN';
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 const { Option } = Select;
 
-// Định nghĩa các kiểu dữ liệu
 interface Truong {
   value: string;
   label: string;
@@ -30,17 +29,27 @@ interface Nganh {
   label: string;
 }
 
+interface XetTuyenFormValues {
+  truong: string;
+  nganh: string;
+  toHop: string;
+  hoTen: string;
+  ngaySinh: any;
+  diemThi: string;
+  doiTuongUuTien?: string;
+}
+
 const NoiDungXetTuyen: React.FC = () => {
-  // Khởi tạo state
   const [form] = Form.useForm();
   const [truongList, setTruongList] = useState<Truong[]>([]);
   const [nganhList, setNganhList] = useState<Nganh[]>([]);
   const [toHopList, setToHopList] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
+  const [fileList, setFileList] = useState<any[]>([]);
   const [api, contextHolder] = notification.useNotification();
 
-  // Hàm hiển thị thông báo
+  // Thông báo
   const showNotification = (type: 'success' | 'error', message: string, description: string) => {
     api[type]({
       message,
@@ -50,19 +59,17 @@ const NoiDungXetTuyen: React.FC = () => {
     });
   };
 
-  // Lấy danh sách trường khi component mount
+  // Lấy danh sách trường khi mount
   useEffect(() => {
     fetchTruongList();
   }, []);
 
-  // Lấy danh sách trường
   const fetchTruongList = async () => {
     setLoading(true);
     try {
       const response = await axios.get('http://localhost:3000/api/truong');
       setTruongList(response.data);
     } catch (error) {
-      console.error('Lỗi khi lấy danh sách trường:', error);
       showNotification(
         'error',
         'Lỗi dữ liệu',
@@ -73,20 +80,16 @@ const NoiDungXetTuyen: React.FC = () => {
     }
   };
 
-  // Lấy danh sách ngành theo trường đã chọn
   const fetchNganhList = async (truongKey: string) => {
     setNganhList([]);
     setToHopList([]);
     form.resetFields(['nganh', 'toHop']);
-    
     if (!truongKey) return;
-    
     setLoading(true);
     try {
       const response = await axios.get(`http://localhost:3000/api/nganh/${truongKey}`);
       setNganhList(response.data);
     } catch (error) {
-      console.error('Lỗi khi lấy danh sách ngành:', error);
       showNotification(
         'error',
         'Lỗi dữ liệu',
@@ -97,19 +100,15 @@ const NoiDungXetTuyen: React.FC = () => {
     }
   };
 
-  // Lấy danh sách tổ hợp theo trường và ngành đã chọn
   const fetchToHopList = async (truongKey: string, nganhKey: string) => {
     setToHopList([]);
     form.resetFields(['toHop']);
-    
     if (!truongKey || !nganhKey) return;
-    
     setLoading(true);
     try {
       const response = await axios.get(`http://localhost:3000/api/tohop/${truongKey}/${nganhKey}`);
       setToHopList(response.data);
     } catch (error) {
-      console.error('Lỗi khi lấy danh sách tổ hợp:', error);
       showNotification(
         'error',
         'Lỗi dữ liệu',
@@ -120,20 +119,32 @@ const NoiDungXetTuyen: React.FC = () => {
     }
   };
 
+  // Xử lý thay đổi file upload
+  const handleFileChange = ({ fileList }: any) => {
+    setFileList(fileList);
+  };
+
   // Xử lý khi submit form
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = async (values: XetTuyenFormValues) => {
     setSubmitting(true);
-    
+
+    if (!fileList || fileList.length === 0) {
+      message.error('Vui lòng tải lên ít nhất 1 file minh chứng!');
+      setSubmitting(false);
+      return;
+    }
+
+    // Lấy userId từ localStorage
+    const userId = localStorage.getItem('token');
+    if (!userId) {
+      message.error('Bạn chưa đăng nhập. Vui lòng đăng nhập để nộp hồ sơ!');
+      setSubmitting(false);
+      return;
+    }
+
     try {
-      // Lấy token từ localStorage
-      const token = localStorage.getItem('token');
-      if (!token) {
-        showNotification('error', 'Lỗi xác thực', 'Bạn chưa đăng nhập. Vui lòng đăng nhập lại.');
-        return;
-      }
-      
-      // Chuẩn bị dữ liệu gửi lên
       const formData = new FormData();
+      formData.append('userId', userId);
       formData.append('truong', values.truong);
       formData.append('nganh', values.nganh);
       formData.append('toHop', values.toHop);
@@ -141,53 +152,34 @@ const NoiDungXetTuyen: React.FC = () => {
       formData.append('ngaySinh', values.ngaySinh.format('YYYY-MM-DD'));
       formData.append('diemThi', values.diemThi);
       formData.append('doiTuongUuTien', values.doiTuongUuTien || '');
-      
-      // Thêm file minh chứng
-      if (values.files && values.files.fileList) {
-        values.files.fileList.forEach((file: any) => {
-          formData.append('files', file.originFileObj);
-        });
-      }
-      
-      // Gửi request đến API
-      const response = await axios.post(
+
+      fileList.forEach((file: any) => {
+        formData.append('files', file.originFileObj);
+      });
+
+      await axios.post(
         'http://localhost:3000/api/xettuyen',
         formData,
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
+            'Authorization': `Bearer ${userId}`,
             'Content-Type': 'multipart/form-data'
           }
         }
       );
-      
-      // Xử lý kết quả
+
       showNotification('success', 'Thành công', 'Hồ sơ xét tuyển của bạn đã được gửi thành công!');
-      
-      // Reset form
       form.resetFields();
-      
-    } catch (error) {
-      console.error('Lỗi khi gửi hồ sơ:', error);
-      
-      // Hiển thị thông báo lỗi
+      setFileList([]);
+    } catch (error: any) {
       let errorMessage = 'Không thể kết nối đến máy chủ';
       if (axios.isAxiosError(error) && error.response) {
         errorMessage = error.response.data.error || error.response.data.message || 'Gửi hồ sơ thất bại';
       }
-      
       showNotification('error', 'Gửi hồ sơ thất bại', errorMessage);
     } finally {
       setSubmitting(false);
     }
-  };
-
-  // Cấu hình cho Upload
-  const normFile = (e: any) => {
-    if (Array.isArray(e)) {
-      return e;
-    }
-    return e?.fileList;
   };
 
   return (
@@ -197,7 +189,6 @@ const NoiDungXetTuyen: React.FC = () => {
         <Title level={2} style={{ textAlign: 'center', marginBottom: 30, color: 'red' }}>
           HỒ SƠ XÉT TUYỂN TRỰC TUYẾN
         </Title>
-        
         <Spin spinning={loading || submitting}>
           <Form
             form={form}
@@ -308,18 +299,17 @@ const NoiDungXetTuyen: React.FC = () => {
 
             {/* Upload minh chứng */}
             <Form.Item
-              name="files"
               label="Tải lên minh chứng (học bạ, bằng điểm, CCCD,...)"
-              valuePropName="file"
-              getValueFromEvent={normFile}
               rules={[{ required: true, message: 'Vui lòng tải lên ít nhất 1 file minh chứng!' }]}
               extra="Hỗ trợ: JPG, PNG, PDF. Tối đa 3 file."
             >
               <Upload
                 listType="picture"
                 maxCount={3}
+                fileList={fileList}
+                onChange={handleFileChange}
+                beforeUpload={() => false}
                 multiple
-                beforeUpload={() => false} // Ngăn upload tự động
               >
                 <Button icon={<UploadOutlined />}>Tải lên file</Button>
               </Upload>

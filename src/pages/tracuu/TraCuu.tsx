@@ -1,41 +1,70 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Tag, Input, Button, notification, Card, Space, Spin } from 'antd';
+import { Table, Tag, Button, notification, Card, Space, Popconfirm } from 'antd';
 import axios from 'axios';
 import RootLayout from '../../component/dunglai/RootLayout';
 
 interface HoSo {
-  ketQua: string;
   id: string;
   hoTen: string;
-  ngayDangKy: string;
-  trangThai: 'Chờ duyệt' | 'Đã duyệt' | 'Từ chối';
+  ngayDangKy: string; // hoặc ngayNop tùy backend
+  trangThai: 'dang_duyet' | 'duyet' | 'tu_choi';
   diemThi?: number;
+  ketQua?: string;
 }
 
-const statusColor = {
-  'Chờ duyệt': 'orange',
-  'Đã duyệt': 'green',
-  'Từ chối': 'red',
+const statusLabelMap = {
+  dang_duyet: 'Chờ duyệt',
+  duyet: 'Đã duyệt',
+  tu_choi: 'Từ chối',
 };
 
-const TheoDoiHoSoTraCuu: React.FC = () => {
-  const [searchId, setSearchId] = useState('');
-  const [filteredHoSo, setFilteredHoSo] = useState<HoSo | null>(null);
-  const [loadingSearch, setLoadingSearch] = useState(false);
-  const [loadingList, setLoadingList] = useState(false);
-  const [hoSoList, setHoSoList] = useState<HoSo[]>([]);
+const statusColor = {
+  dang_duyet: 'orange',
+  duyet: 'green',
+  tu_choi: 'red',
+};
 
-  // Lấy danh sách hồ sơ khi component mount
+const AdminHoSo: React.FC = () => {
+  const [hoSoList, setHoSoList] = useState<HoSo[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  const fetchHoSoList = async () => {
+    setLoading(true);
+    try {
+      // Thay token admin-token bằng token thực tế của bạn
+      const res = await axios.get<HoSo[]>('http://localhost:3000/api/admin/profiles', {
+        headers: { Authorization: 'Bearer admin-token' },
+      });
+      setHoSoList(res.data);
+    } catch (error) {
+      notification.error({ message: 'Lỗi lấy danh sách hồ sơ' });
+      setHoSoList([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    setLoadingList(true);
-    axios.get<HoSo[]>('http://localhost:3000/api/hoso')
-      .then(res => setHoSoList(res.data))
-      .catch(() => {
-        notification.error({ message: 'Lỗi lấy danh sách hồ sơ' });
-        setHoSoList([]);
-      })
-      .finally(() => setLoadingList(false));
+    fetchHoSoList();
   }, []);
+
+  const updateStatus = async (id: string, trangThai: 'duyet' | 'tu_choi') => {
+    setUpdatingId(id);
+    try {
+      await axios.post(
+        `http://localhost:3000/api/admin/profiles/${id}/status`,
+        { trangThai },
+        { headers: { Authorization: 'Bearer admin-token' } }
+      );
+      notification.success({ message: `Đã cập nhật trạng thái thành ${statusLabelMap[trangThai]}` });
+      await fetchHoSoList();
+    } catch (error) {
+      notification.error({ message: 'Cập nhật trạng thái thất bại' });
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   const columns = [
     {
@@ -50,89 +79,62 @@ const TheoDoiHoSoTraCuu: React.FC = () => {
     },
     {
       title: 'Ngày đăng ký',
-      dataIndex: 'ngayNop',
-      key: 'ngayNop',
+      dataIndex: 'ngayDangKy',
+      key: 'ngayDangKy',
+      render: (text: string) => new Date(text).toLocaleDateString(),
     },
     {
       title: 'Trạng thái',
       dataIndex: 'trangThai',
       key: 'trangThai',
-      render: (text: string) => <Tag color={statusColor[text as keyof typeof statusColor]}>{text}</Tag>,
+      render: (text: string) => <Tag color={statusColor[text as keyof typeof statusColor]}>{statusLabelMap[text as keyof typeof statusLabelMap]}</Tag>,
+    },
+    {
+      title: 'Hành động',
+      key: 'action',
+      render: (_: any, record: HoSo) => {
+        if (record.trangThai === 'dang_duyet') {
+          return (
+            <Space>
+              <Popconfirm
+                title="Bạn có chắc muốn duyệt hồ sơ này?"
+                onConfirm={() => updateStatus(record.id, 'duyet')}
+                okText="Duyệt"
+                cancelText="Hủy"
+              >
+                <Button type="primary" loading={updatingId === record.id}>Duyệt</Button>
+              </Popconfirm>
+              <Popconfirm
+                title="Bạn có chắc muốn từ chối hồ sơ này?"
+                onConfirm={() => updateStatus(record.id, 'tu_choi')}
+                okText="Từ chối"
+                cancelText="Hủy"
+              >
+                <Button danger loading={updatingId === record.id}>Từ chối</Button>
+              </Popconfirm>
+            </Space>
+          );
+        }
+        return <i>Đã xử lý</i>;
+      },
     },
   ];
 
-  const onSearch = async () => {
-    if (!searchId.trim()) {
-      notification.warning({ message: 'Vui lòng nhập mã hồ sơ để tra cứu' });
-      setFilteredHoSo(null);
-      return;
-    }
-
-    setLoadingSearch(true);
-    try {
-      const res = await axios.get<HoSo>(`http://localhost:3000/api/hoso/${searchId.trim()}`);
-      setFilteredHoSo(res.data);
-    } catch (error) {
-      notification.error({ message: 'Không tìm thấy hồ sơ với mã đã nhập hoặc lỗi server' });
-      setFilteredHoSo(null);
-    } finally {
-      setLoadingSearch(false);
-    }
-  };
-
   return (
-    <RootLayout username="MINH" onLogout={() => {}}>
-      <h2>Theo dõi trạng thái hồ sơ và Tra cứu kết quả</h2>
-
-      <Card style={{ marginBottom: 24 }}>
-        <h3>Danh sách trạng thái hồ sơ</h3>
+    <RootLayout username="Admin" onLogout={() => {}}>
+      <h2>Quản trị Hồ sơ xét tuyển</h2>
+      <Card>
         <Table
           columns={columns}
           dataSource={hoSoList}
           rowKey="id"
-          pagination={false}
-          bordered
-          loading={loadingList}
-          locale={{ emptyText: 'Không có hồ sơ hiển thị' }}
+          loading={loading}
+          pagination={{ pageSize: 10 }}
+          locale={{ emptyText: 'Không có hồ sơ nào' }}
         />
-      </Card>
-
-      <Card>
-        <h3>Tra cứu kết quả xét tuyển</h3>
-        <Space style={{ marginBottom: 16 }}>
-          <Input
-            placeholder="Nhập mã hồ sơ (ví dụ: HS001)"
-            value={searchId}
-            onChange={e => setSearchId(e.target.value)}
-            style={{ width: 300 }}
-            onPressEnter={onSearch}
-            disabled={loadingSearch}
-          />
-          <Button type="primary" onClick={onSearch} loading={loadingSearch}>
-            Tra cứu
-          </Button>
-        </Space>
-
-        {filteredHoSo && (
-          <Card type="inner" title={`Kết quả hồ sơ ${filteredHoSo.id}`}>
-            <p><b>Họ và tên:</b> {filteredHoSo.hoTen}</p>
-            <p>
-              <b>Trạng thái:</b>{' '}
-              <Tag color={statusColor[filteredHoSo.trangThai]}>{filteredHoSo.trangThai}</Tag>
-            </p>
-            {filteredHoSo.trangThai === 'Đã duyệt' ? (
-              <>
-                <p><b>Điểm thi:</b> {filteredHoSo.diemThi ?? 'Chưa có'}</p>
-                <p><b>Kết quả:</b> {filteredHoSo.ketQua ?? 'Chưa có'}</p>
-              </>
-            ) : (
-              <p>Kết quả chưa có hoặc hồ sơ chưa được duyệt.</p>
-            )}
-          </Card>
-        )}
       </Card>
     </RootLayout>
   );
 };
 
-export default TheoDoiHoSoTraCuu;
+export default AdminHoSo;

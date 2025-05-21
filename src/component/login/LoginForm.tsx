@@ -1,90 +1,60 @@
-import React, { useState } from 'react';
-import { Form, Input, Button, Typography } from 'antd';
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import axios from 'axios';
-
-const { Text, Link } = Typography;
+import React from 'react';
+import { Form, Input, Button } from 'antd';
 
 interface LoginFormProps {
-  onLogin: (username: string) => void;
-  switchToRegister: () => void;
-  showNotification: (type: 'success' | 'error', message: string, description: string) => void;
+  loading: boolean;
+  onLogin: (sdt: string, password: string) => void;
+  onRegister: () => void;
+  goToAdminLogin: () => void;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ onLogin, switchToRegister, showNotification }) => {
-  const [loading, setLoading] = useState(false);
+const LoginForm: React.FC<LoginFormProps> = ({
+  loading,
+  onLogin,
+  onRegister,
+  goToAdminLogin,
+}) => {
+  const [form] = Form.useForm();
 
-  const handleFinish = async (values: { canCuoc: string; matKhau: string }) => {
-    setLoading(true);
-    try {
-      // Gọi API đăng nhập với API endpoint của bạn
-      const response = await axios.post('http://localhost:3000/api/login', {
-        canCuoc: values.canCuoc,
-        matKhau: values.matKhau
-      });
-
-      const { token, user } = response.data;
-      
-      // Lưu thông tin đăng nhập vào localStorage
-      localStorage.setItem('token', token);
-      localStorage.setItem('userData', JSON.stringify(user));
-      
-      // Gọi hàm callback để thông báo đăng nhập thành công
-      onLogin(user.ten || user.canCuoc);
-    } catch (error) {
-      console.error('Lỗi đăng nhập:', error);
-      
-      // Hiển thị thông báo lỗi
-      let errorMessage = 'Không thể kết nối đến máy chủ';
-      if (axios.isAxiosError(error) && error.response) {
-        errorMessage = error.response.data.message || 'Đăng nhập thất bại';
-      }
-      
-      showNotification('error', 'Đăng nhập thất bại', errorMessage);
-    } finally {
-      setLoading(false);
-    }
+  const onFinish = (values: { sdt: string; password: string }) => {
+    onLogin(values.sdt, values.password);
   };
 
   return (
-    <Form
-      name="login"
-      initialValues={{ remember: true }}
-      onFinish={handleFinish}
-      layout="vertical"
-      size="large"
-    >
+    <Form form={form} layout="vertical" onFinish={onFinish}>
       <Form.Item
-        name="canCuoc"
-        rules={[{ required: true, message: 'Vui lòng nhập căn cước công dân!' }]}
+        label="Số điện thoại"
+        name="sdt"
+        rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }]}
       >
-        <Input 
-          prefix={<UserOutlined />} 
-          placeholder="Căn cước công dân" 
-        />
+        <Input placeholder="Nhập số điện thoại" autoComplete="tel" />
       </Form.Item>
 
       <Form.Item
-        name="matKhau"
+        label="Mật khẩu"
+        name="password"
         rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
       >
-        <Input.Password
-          prefix={<LockOutlined />}
-          placeholder="Mật khẩu"
-        />
+        <Input.Password placeholder="Nhập mật khẩu" autoComplete="current-password" />
       </Form.Item>
 
       <Form.Item>
-        <Button type="primary" htmlType="submit" loading={loading} block style={{ height: '40px', backgroundColor: 'red', borderColor: 'red' }}>
+        <Button type="primary" htmlType="submit" loading={loading} block>
           Đăng nhập
         </Button>
       </Form.Item>
 
-      <div style={{ textAlign: 'center' }}>
-        <Text>
-          Chưa có tài khoản? <Link onClick={switchToRegister} style={{ color: 'red' }}>Đăng ký ngay</Link>
-        </Text>
-      </div>
+      <Form.Item>
+        <Button type="link" onClick={onRegister} block>
+          Chưa có tài khoản? Đăng ký
+        </Button>
+      </Form.Item>
+
+      <Form.Item>
+        <Button type="default" onClick={goToAdminLogin} block>
+          Đăng nhập Admin
+        </Button>
+      </Form.Item>
     </Form>
   );
 };

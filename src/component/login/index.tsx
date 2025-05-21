@@ -1,191 +1,222 @@
-import React, { useState, useEffect } from 'react';
-import { Layout, Typography, notification, Space, Divider } from 'antd';
+import React, { useState } from 'react';
+import { Card, Typography, notification } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import NewsSlider from './NewsSlider';
-import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
-import AdminLoginForm from './AdminLoginForm';
-import { type User, usersDB } from './usersDB';
+import OTPForm from './OTPForm';
+import LoginForm from './LoginForm';
 
-const { Content } = Layout;
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
-interface LoginRegisterProps {
-  onLogin: (username: string) => void;
-}
-
-const LoginRegister: React.FC<LoginRegisterProps> = ({ onLogin }) => {
-  const [users, setUsers] = useState<User[]>(usersDB);
-  const [isLogin, setIsLogin] = useState(true);
-  const [isAdminLogin, setIsAdminLogin] = useState(false);
-  const [api, contextHolder] = notification.useNotification();
+// Cập nhật props để nhận hàm onLogin từ Router
+const SimpleAuthPage = ({ onLogin }) => {
+  const [isLogin, setIsLogin] = useState(true); // Hiển thị màn hình đăng nhập trước
+  const [registerStep, setRegisterStep] = useState(1); // 1: Đăng ký, 2: Nhập OTP
+  const [loading, setLoading] = useState(false);
+  const [registerEmail, setRegisterEmail] = useState('');
+  const [registerInfo, setRegisterInfo] = useState(null);
+  
+  // Sử dụng hook useNavigate của React Router để chuyển hướng
   const navigate = useNavigate();
 
-  // Kiểm tra xem người dùng đã đăng nhập chưa khi component mount
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('userData');
-    
-    if (token && userData) {
-      try {
-        const user = JSON.parse(userData);
-        // Nếu đã đăng nhập, chuyển hướng đến trang chính
-        onLogin(user.ten || user.canCuoc);
-        navigate('/xet-tuyen');
-      } catch (error) {
-        console.error('Lỗi khi phân tích thông tin người dùng:', error);
+  // Xử lý đăng nhập
+  const handleLogin = async (sdt, password) => {
+    setLoading(true);
+    try {
+      const loginRes = await fetch('http://localhost:3000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sdt, password }),
+      });
+      
+      const loginData = await loginRes.json();
+      
+      if (loginRes.ok) {
+        notification.success({ 
+          message: 'Đăng nhập thành công', 
+          description: `Chào mừng ${loginData.user?.ten || 'bạn'}!` 
+        });
+        // Lưu thông tin đăng nhập vào localStorage nếu cần
+        if (loginData.token) {
+          localStorage.setItem('token', loginData.token);
+        }
+        if (loginData.user) {
+          localStorage.setItem('user', JSON.stringify(loginData.user));
+          // Gọi hàm onLogin từ props để cập nhật trạng thái đăng nhập ở component cha
+          onLogin(loginData.user.ten || loginData.user.sdt);
+        }
+        // Sử dụng React Router để chuyển hướng
+        navigate('/dashboard');
+      } else {
+        notification.error({ 
+          message: 'Đăng nhập thất bại', 
+          description: loginData.message || 'Sai số điện thoại hoặc mật khẩu.'
+        });
       }
+    } catch (error) {
+      notification.error({ 
+        message: 'Lỗi mạng', 
+        description: 'Không thể kết nối tới máy chủ' 
+      });
+    } finally {
+      setLoading(false);
     }
-  }, [navigate, onLogin]);
-
-  const showNotification = (type: 'success' | 'error', message: string, description: string) => {
-    api[type]({
-      message,
-      description,
-      placement: 'topRight',
-      duration: 3,
-    });
   };
 
-  const handleLogin = (username: string) => {
-    showNotification('success', 'Đăng nhập thành công', `Chào mừng ${username} quay trở lại!`);
-    onLogin(username);
-    navigate('/xet-tuyen');
+  // Gọi API đăng ký và xử lý kết quả
+  const handleRegister = async (ten, sdt, email, password) => {
+    setLoading(true);
+    try {
+      const res = await fetch('http://localhost:3000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ten, sdt, email, password }),
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok) {
+        notification.success({ 
+          message: 'Đăng ký thành công', 
+          description: 'Mã OTP đã được gửi đến email của bạn. Vui lòng kiểm tra và xác nhận.' 
+        });
+        // Lưu thông tin đăng ký và chuyển sang màn hình nhập OTP
+        setRegisterEmail(email);
+        setRegisterInfo({ ten, sdt, password });
+        setRegisterStep(2);
+      } else {
+        notification.error({ 
+          message: 'Đăng ký thất bại', 
+          description: data.message || 'Có lỗi xảy ra khi đăng ký.'
+        });
+      }
+    } catch (error) {
+      notification.error({ 
+        message: 'Lỗi mạng', 
+        description: 'Không thể kết nối tới máy chủ' 
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleRegister = (username: string, password: string): boolean => {
-    const userExists = users.find(u => u.username === username);
-    
-    if (userExists) {
-      showNotification('error', 'Đăng ký thất bại', 'Tên đăng nhập đã tồn tại!');
-      return false;
+  // Chuyển đổi màn hình đăng ký và OTP
+  const switchToRegisterStep = (step) => {
+    setRegisterStep(step);
+  };
+
+  // Chuyển đổi giữa đăng nhập và đăng ký
+  const toggleLoginRegister = (login) => {
+    setIsLogin(login);
+    if (login) {
+      setRegisterStep(1);
     }
-    
-    setUsers(prev => [...prev, { username, password }]);
-    setIsLogin(true);
-    showNotification('success', 'Đăng ký thành công', 'Vui lòng đăng nhập với tài khoản mới của bạn!');
-    return true;
+  };
+
+  // Xác thực OTP thành công
+  const handleOTPVerifySuccess = () => {
+    // Sau khi xác thực OTP thành công, tự động đăng nhập
+    handleLoginAfterOTPVerification();
+  };
+
+  // Tự động đăng nhập sau khi xác thực OTP
+  const handleLoginAfterOTPVerification = async () => {
+    if (!registerInfo) {
+      notification.error({ message: 'Lỗi', description: 'Không có thông tin đăng nhập' });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const loginRes = await fetch('http://localhost:3000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sdt: registerInfo.sdt, password: registerInfo.password }),
+      });
+      
+      const loginData = await loginRes.json();
+      
+      if (loginRes.ok) {
+        notification.success({ 
+          message: 'Đăng nhập thành công', 
+          description: `Chào mừng ${loginData.user?.ten || 'bạn'}!` 
+        });
+        // Lưu thông tin đăng nhập vào localStorage nếu cần
+        if (loginData.token) {
+          localStorage.setItem('token', loginData.token);
+        }
+        if (loginData.user) {
+          localStorage.setItem('user', JSON.stringify(loginData.user));
+          // Gọi hàm onLogin từ props để cập nhật trạng thái đăng nhập ở component cha
+          onLogin(loginData.user.ten || loginData.user.sdt);
+        }
+        // Sử dụng React Router để chuyển hướng
+        navigate('/dashboard');
+      } else {
+        notification.error({ 
+          message: 'Đăng nhập thất bại', 
+          description: loginData.message || 'Có lỗi xảy ra khi đăng nhập.'
+        });
+      }
+    } catch (error) {
+      notification.error({ 
+        message: 'Lỗi mạng', 
+        description: 'Không thể kết nối tới máy chủ' 
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Xử lý chuyển trang đăng nhập admin
+  const handleGoToAdminLogin = () => {
+    navigate('/admin');
+  };
+
+  // Xác định tiêu đề dựa trên trạng thái hiện tại của trang
+  const getPageTitle = () => {
+    if (isLogin) return 'Đăng nhập';
+    return registerStep === 1 ? 'Đăng ký' : 'Xác thực OTP';
   };
 
   return (
-    <>
-      {contextHolder}
-      <Layout style={{ height: '100vh', display: 'flex', flexDirection: 'row' }}>
-        {/* Phần tin tức - bên trái */}
-        <Content
-          style={{
-            display: 'flex',
-            padding: 0,
-            height: '100%',
-            backgroundImage: 'linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.4)), url("https://xdcs.cdnchinhphu.vn/446259493575335936/2024/8/19/bc1-1724044987903794541151.jpg")',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            flex: 6,
-            position: 'relative',
-            color: 'white',
-            alignItems: 'flex-end',
-            justifyContent: 'center',
-            flexDirection: 'column',
-            borderRight: '5px solid red',
-          }}
-        >
-          <div style={{ 
-            position: 'relative', 
-            zIndex: 2, 
-            width: '100%', 
-            maxWidth: '950px',
-            padding: '35px',
-            backgroundColor: 'rgba(0,0,0,0.6)',
-            boxShadow: '0 -4px 20px rgba(0,0,0,0.3)',
-            marginBottom: '50px'
-          }}>
-            <div style={{ marginBottom: '20px' }}>
-              <Title level={2} style={{ color: 'white', textAlign: 'center', margin: '0 0 10px' }}>
-                <span style={{ color: 'red' }}></span> NEWS
-              </Title>
-              <Divider style={{ backgroundColor: 'rgba(255,255,255,0.3)', margin: '15px 0' }}/>
-            </div>
-            <NewsSlider />
-          </div>
-          <div 
-            style={{
-              position: 'absolute',
-              inset: 0,
-              backgroundColor: 'rgba(255,255,255,0.2)',
-              zIndex: 1
-            }}
+    <div style={{ maxWidth: 400, margin: '50px auto' }}>
+      <Card>
+        <Title level={2} style={{ textAlign: 'center' }}>
+          {getPageTitle()}
+        </Title>
+        
+        {isLogin && (
+          <LoginForm 
+            loading={loading}
+            onLogin={handleLogin}
+            onRegister={() => toggleLoginRegister(false)}
+            goToAdminLogin={handleGoToAdminLogin}
           />
-        </Content>
-
-        {/* Phần form đăng nhập/đăng ký - bên phải */}
-        <Content
-          style={{
-            flex: 4,
-            backgroundColor: '#f0f2f5',
-            padding: '40px 20px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'auto'
-          }}
-        >
-          <div style={{
-            width: '100%',
-            maxWidth: '450px',
-            backgroundColor: 'white',
-            padding: '40px',
-            borderRadius: '12px',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-            border: '1px solid #e8e8e8'
-          }}>
-            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-              <Title level={1} style={{ color: 'red', margin: '0 0 12px', fontSize: '32px' }}>
-                Hệ thống xét tuyển trực tuyến
-              </Title>
-              <Text type="secondary" style={{ fontSize: '16px' }}>Hệ thống xét tuyển</Text>
-            </div>
-
-            {/* Toggle chọn loại đăng nhập */}
-            <Space style={{ marginBottom: 20, justifyContent: 'center', width: '100%' }}>
-              <Text 
-                strong={!isAdminLogin} 
-                style={{ cursor: 'pointer', color: !isAdminLogin ? 'red' : undefined }} 
-                onClick={() => setIsAdminLogin(false)}
-              >
-                Đăng nhập Người dùng
-              </Text>
-              <Text 
-                strong={isAdminLogin} 
-                style={{ cursor: 'pointer', color: isAdminLogin ? 'red' : undefined }} 
-                onClick={() => setIsAdminLogin(true)}
-              >
-                Đăng nhập Quản trị viên
-              </Text>
-            </Space>
-
-            {/* Hiển thị form tương ứng */}
-            {isAdminLogin ? (
-              <AdminLoginForm onLogin={handleLogin} showNotification={showNotification} />
-            ) : (
-              isLogin ? (
-                <LoginForm 
-                  users={users} 
-                  onLogin={handleLogin} 
-                  switchToRegister={() => setIsLogin(false)} 
-                />
-              ) : (
-                <RegisterForm 
-                  onRegister={handleRegister} 
-                  switchToLogin={() => setIsLogin(true)} 
-                />
-              )
-            )}
-          </div>
-        </Content>
-      </Layout>
-    </>
+        )}
+        
+        {!isLogin && registerStep === 1 && (
+          <RegisterForm 
+            loading={loading}
+            setLoading={setLoading}
+            showNotification={(type, message, description) => 
+              notification[type]({ message, description })
+            }
+            onRegister={handleRegister}
+            setIsLogin={() => toggleLoginRegister(true)}
+            goToAdminLogin={handleGoToAdminLogin}
+          />
+        )}
+        
+        {!isLogin && registerStep === 2 && (
+          <OTPForm 
+            email={registerEmail} 
+            onVerifySuccess={handleOTPVerifySuccess}
+            switchToRegisterStep={switchToRegisterStep}
+          />
+        )}
+      </Card>
+    </div>
   );
 };
 
-export default LoginRegister;
+export default SimpleAuthPage;
