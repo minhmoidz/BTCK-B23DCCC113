@@ -1,0 +1,161 @@
+[
+  {
+    "id": "f0594068-dd90-4a64-9ba1-fc192cc9dbc9",
+    "truong": "neu",
+    "nganh": "ktqt",
+    "toHop": "D01",
+    "hoTen": "minh",
+    "ngaySinh": "2025-05-09",
+    "diemThi": "21",
+    "doiTuongUuTien": "02",
+    "files": [
+      "uploads/minh_2025-05-09/1747668326586_ac1a8e317d3ac864912b_jpg"
+    ],
+    "trangThai": "duyet",
+    "createdAt": "2025-05-19T15:25:26.637Z",
+    "updatedAt": "2025-05-19T15:32:55.284Z"
+  },
+  {
+    "id": "f14a9ddd-d93e-41cc-81e2-e5520eb01681",
+    "truong": "neu",
+    "nganh": "ktqt",
+    "toHop": "A01",
+    "hoTen": "minhhhhh",
+    "ngaySinh": "2025-05-01",
+    "diemThi": "8",
+    "doiTuongUuTien": "01",
+    "files": [
+      "uploads/minhhhhh_2025-05-01/1747668435999_ac1a8e317d3ac864912b_jpg"
+    ],
+    "trangThai": "duyet",
+    "createdAt": "2025-05-19T15:27:16.007Z",
+    "updatedAt": "2025-05-19T17:00:32.362Z"
+  },
+  {
+    "id": "6bbb9c99-d212-4911-bb6d-12a3c8a1b101",
+    "truong": "uet",
+    "nganh": "cntt",
+    "toHop": "A00",
+    "hoTen": "hue",
+    "ngaySinh": "2025-05-01",
+    "diemThi": "21",
+    "doiTuongUuTien": "01",
+    "files": [
+      "uploads/hue_2025-05-01/1747668638104_ac1a8e317d3ac864912b_jpg"
+    ],
+    "trangThai": "dang_duyet",
+    "createdAt": "2025-05-19T15:30:38.111Z"
+  },
+  {
+    "id": "4bea979a-2811-47dc-b8be-e3d882b93039",
+    "userId": "d1fb57a3-176f-421a-8459-fcfe21e77e71",
+    "truong": "neu",
+    "nganh": "ktqt",
+    "toHop": "A01",
+    "hoTen": "minh",
+    "ngaySinh": "2025-05-02",
+    "diemThi": "21",
+    "doiTuongUuTien": "02",
+    "files": [
+      "uploads/minh_2025-05-02/1747670369098_ac1a8e317d3ac864912b_jpg"
+    ],
+    "trangThai": "dang_duyet",
+    "createdAt": "2025-05-19T15:59:29.110Z"
+  },
+  {
+    "id": "1923e4a9-8809-4b77-a654-61e9e2fd7bac",
+    "userId": "6d95898d-36e2-4439-bb2b-e227f2ec48d9",
+    "truong": "hust",
+    "nganh": "dtvt",
+    "toHop": "A01",
+    "hoTen": "minh",
+    "ngaySinh": "2025-05-02",
+    "diemThi": "21",
+    "doiTuongUuTien": "02",
+    "files": [
+      "uploads/minh_2025-05-02/1747670966719_ac1a8e317d3ac864912b_jpg"
+    ],
+    "trangThai": "dang_duyet",
+    "createdAt": "2025-05-19T16:09:26.726Z"
+  },
+  {
+    "id": "265b97ee-6f6e-4169-bfc6-56469ff5bca3",
+    "userId": "d8a08cb2-8449-4131-aed0-5e79ebe923a5",
+    "truong": "neu",
+    "nganh": "ktqt",
+    "toHop": "D01",
+    "hoTen": "meo",
+    "ngaySinh": "2025-05-08",
+    "diemThi": "21",
+    "doiTuongUuTien": "02",
+    "files": [
+      "uploads/meo_2025-05-08/1747672332644_ac1a8e317d3ac864912b_jpg"
+    ],
+    "trangThai": "dang_duyet",
+    "createdAt": "2025-05-19T16:32:12.647Z"
+  },
+  {
+    "id": "500f0431-28cc-4669-bd3a-b977761f10f1",
+    "userId": "d8a08cb2-8449-4131-aed0-5e79ebe923a5",
+    "truong": "neu",
+    "nganh": "ktqd",
+    "toHop": "A01",
+    "hoTen": "nn",
+    "ngaySinh": "2025-05-09",
+    "diemThi": "5",
+    "doiTuongUuTien": "02",
+    "files": [
+      "uploads/nn_2025-05-09/1747674022484_ac1a8e317d3ac864912b_jpg"
+    ],
+    "trangThai": "dang_duyet",
+    "createdAt": "2025-05-19T17:00:22.488Z"
+  },
+  {
+    "id": "f38f09dd-daa1-4d03-b4b7-242b2df1f648",
+    "userId": "05b6ef20-2011-4069-9988-570bbdd29c72",
+    "truong": "neu",
+    "nganh": "ktqt",
+    "toHop": "A01",
+    "hoTen": "yy",
+    "ngaySinh": "2025-05-01",
+    "diemThi": "21",
+    "doiTuongUuTien": "01",
+    "files": [
+      "uploads/yy_2025-05-01/1747751511940_ac1a8e317d3ac864912b_jpg"
+    ],
+    "trangThai": "dang_duyet",
+    "createdAt": "2025-05-20T14:31:51.948Z"
+  },
+  {
+    "id": "4a7e4788-fd02-4567-add7-c87c1d59b717",
+    "userId": "feae5258-05f2-42e1-b5e3-e9e121013e1e",
+    "truong": "neu",
+    "nganh": "ktqt",
+    "toHop": "A01",
+    "hoTen": "kim chung",
+    "ngaySinh": "2025-05-04",
+    "diemThi": "12",
+    "doiTuongUuTien": "02",
+    "files": [
+      "uploads/kim_chung_2025-05-04/1747759289223_ac1a8e317d3ac864912b_jpg"
+    ],
+    "trangThai": "dang_duyet",
+    "createdAt": "2025-05-20T16:41:29.225Z"
+  },
+  {
+    "id": "7f9742d2-5415-4918-81fc-c55ac487ed4b",
+    "userId": "feae5258-05f2-42e1-b5e3-e9e121013e1e",
+    "truong": "neu",
+    "nganh": "ktqd",
+    "toHop": "A01",
+    "hoTen": "tran tuan minh",
+    "ngaySinh": "2025-05-15",
+    "diemThi": "21",
+    "doiTuongUuTien": "02",
+    "files": [
+      "uploads/tran_tuan_minh_2025-05-15/1747805967022_ac1a8e317d3ac864912b_jpg"
+    ],
+    "trangThai": "dang_duyet",
+    "createdAt": "2025-05-21T05:39:27.028Z"
+  }
+]
