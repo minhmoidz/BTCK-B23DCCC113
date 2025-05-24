@@ -1,171 +1,103 @@
 // --- START OF FILE donXetTuyenController.mjs ---
 
-import DonXetTuyen from '../models/DonXetTuyen.mjs';
-import Nganh from '../models/Nganh.mjs';
-import fs from 'fs'; // Thêm module fs để xóa file nếu có lỗi
-import multer from 'multer'; // Import multer để có thể check instanceof MulterError
+import fs from 'fs';
+import multer from 'multer';
+import {
+  submitDonXetTuyenService,
+  getDonXetTuyenByUserService,
+  updateTrangThaiDonService,
+  getDonXetTuyenByIdService
+} from '../services/donXetTuyen.service.mjs';
+
+// Helper function để xóa files đã upload
+const cleanupUploadedFiles = (files) => {
+  if (files && files.length > 0) {
+    files.forEach(file => {
+      try {
+        fs.unlinkSync(file.path);
+      } catch (e) {
+        console.error("Lỗi khi dọn dẹp file:", e);
+      }
+    });
+  }
+};
 
 // Nộp đơn xét tuyển
 export const submitDonXetTuyen = async (req, res) => {
   try {
-    const {
-      userId,
-      hoTen,
-      sdt,
-      email,
-      ngaySinh,
-      truongId,
-      nganhId,
-      phuongThucXetTuyen,
-      toHopXetTuyen, // Sẽ được gửi từ frontend nếu PTXT là 'diem_thi'
-      diemThi,       // Sẽ được gửi từ frontend nếu PTXT là 'diem_thi' hoặc 'tsa'
-      diemHocBa,     // Sẽ được gửi từ frontend nếu PTXT là 'hoc_ba'
-      doiTuongUuTien
-    } = req.body;
+    const { ...donXetTuyenBody } = req.body;
 
-    // 1. Kiểm tra ngành có tồn tại và có phương thức xét tuyển phù hợp không
-    const nganh = await Nganh.findById(nganhId);
-    if (!nganh) {
-      // Nếu ngành không tồn tại, xóa file đã upload (nếu có)
-      if (req.files && req.files.length > 0) {
-        req.files.forEach(file => fs.unlinkSync(file.path));
-      }
-      return res.status(404).json({ message: 'Không tìm thấy ngành học' });
-    }
-
-    if (!nganh.phuongThucXetTuyen.includes(phuongThucXetTuyen)) {
-      // Nếu PTXT không hợp lệ, xóa file đã upload (nếu có)
-      if (req.files && req.files.length > 0) {
-        req.files.forEach(file => fs.unlinkSync(file.path));
-      }
-      return res.status(400).json({ message: 'Phương thức xét tuyển không hợp lệ cho ngành này' });
-    }
-
-    // 2. Xử lý file minh chứng
+    // Xử lý file minh chứng
     const minhChungData = [];
     if (req.files && req.files.length > 0) {
       req.files.forEach(file => {
         minhChungData.push({
           tenFile: file.originalname,
-          // Lưu đường dẫn tương đối, có thể truy cập từ client, dựa trên cấu hình static
-          // Ví dụ: /uploads/minhchung/ten_file_unique.pdf
           duongDan: `/uploads/minhchung/${file.filename}`,
           loaiFile: file.mimetype
         });
       });
     }
 
-    // 3. Tạo đối tượng DonXetTuyen
-    const donXetTuyenData = {
-      userId,
-      hoTen,
-      sdt,
-      email,
-      ngaySinh,
-      truongId,
-      nganhId,
-      phuongThucXetTuyen,
-      doiTuongUuTien,
+    // Gộp body và thông tin minh chứng
+    const donXetTuyenDataForService = {
+      ...donXetTuyenBody,
       minhChung: minhChungData
     };
 
-    // Thêm các trường có điều kiện
-    if (phuongThucXetTuyen === 'diem_thi') {
-      if (!toHopXetTuyen) {
-        if (req.files && req.files.length > 0) {
-            req.files.forEach(file => fs.unlinkSync(file.path));
-        }
-        return res.status(400).json({ message: 'Tổ hợp xét tuyển là bắt buộc cho phương thức điểm thi.' });
-      }
-      if (diemThi === undefined || diemThi === null || isNaN(parseFloat(diemThi))) {
-        if (req.files && req.files.length > 0) {
-            req.files.forEach(file => fs.unlinkSync(file.path));
-        }
-        return res.status(400).json({ message: 'Điểm thi là bắt buộc và phải là số cho phương thức điểm thi.' });
-      }
-      donXetTuyenData.toHopXetTuyen = toHopXetTuyen;
-      donXetTuyenData.diemThi = Number(diemThi);
-    } else if (phuongThucXetTuyen === 'tsa') {
-      if (diemThi === undefined || diemThi === null || isNaN(parseFloat(diemThi))) {
-        if (req.files && req.files.length > 0) {
-            req.files.forEach(file => fs.unlinkSync(file.path));
-        }
-        return res.status(400).json({ message: 'Điểm thi TSA là bắt buộc và phải là số.' });
-      }
-      donXetTuyenData.diemThi = Number(diemThi);
-    } else if (phuongThucXetTuyen === 'hoc_ba') {
-      if (diemHocBa === undefined || diemHocBa === null || isNaN(parseFloat(diemHocBa))) {
-         if (req.files && req.files.length > 0) {
-            req.files.forEach(file => fs.unlinkSync(file.path));
-        }
-        return res.status(400).json({ message: 'Điểm học bạ là bắt buộc và phải là số.' });
-      }
-      donXetTuyenData.diemHocBa = Number(diemHocBa);
-      // Kiểm tra minh chứng bắt buộc cho học bạ (dù schema có thể đã check)
-      if (minhChungData.length === 0) {
-        // Không cần xóa file ở đây vì nếu minhChungData rỗng thì req.files cũng rỗng
-        // hoặc file đã bị filter loại bỏ trước đó bởi multer.
-        return res.status(400).json({ message: 'Minh chứng là bắt buộc cho phương thức xét tuyển học bạ.' });
-      }
-    }
-
-    const donXetTuyen = new DonXetTuyen(donXetTuyenData);
-
-    // 4. Lưu vào cơ sở dữ liệu
-    await donXetTuyen.save(); // Validation của Mongoose (bao gồm pre-validate) sẽ chạy ở đây
+    const donXetTuyen = await submitDonXetTuyenService(donXetTuyenDataForService, req.files);
     res.status(201).json({ message: 'Nộp đơn thành công', donXetTuyen });
 
   } catch (error) {
-    // Xóa các file đã upload nếu có lỗi xảy ra
-    if (req.files && req.files.length > 0) {
-      req.files.forEach(file => {
-        try {
-          fs.unlinkSync(file.path); // file.path là đường dẫn multer đã lưu trên server
-        } catch (e) {
-          console.error("Lỗi khi dọn dẹp file sau khi có lỗi controller:", e);
-        }
-      });
-    }
+    // Xóa các file đã upload nếu có lỗi xảy ra từ service hoặc controller
+    cleanupUploadedFiles(req.files);
 
     if (error.name === 'ValidationError') {
       let errors = {};
       Object.keys(error.errors).forEach((key) => {
         errors[key] = error.errors[key].message;
       });
-      return res.status(400).json({ message: "Dữ liệu không hợp lệ", errors });
+      return res.status(400).json({ message: "Dữ liệu không hợp lệ từ validation schema", errors });
     }
 
+    // Lỗi nghiệp vụ từ service (đã có statusCode)
+    if (error.statusCode) {
+        return res.status(error.statusCode).json({ message: error.message });
+    }
+
+    // Xử lý lỗi Multer (ví dụ: file quá lớn, loại file không hợp lệ từ fileFilter trong route)
     if (error instanceof multer.MulterError) {
-      // Xử lý các lỗi cụ thể của Multer từ route (ví dụ: fileFilter, limits)
       if (error.code === 'LIMIT_FILE_SIZE') {
         return res.status(400).json({ message: 'File quá lớn. Kích thước tối đa là 10MB.' });
       }
-      if (error.code === 'LIMIT_UNEXPECTED_FILE') { // Lỗi này từ fileFilter trong route
-        return res.status(400).json({ message: 'Loại file không hợp lệ. Vui lòng kiểm tra lại.' });
+      // Mã lỗi 'LIMIT_UNEXPECTED_FILE' thường do fileFilter của multer trả về lỗi
+      if (error.code === 'LIMIT_UNEXPECTED_FILE') {
+        return res.status(400).json({ message: 'Loại file không hợp lệ hoặc có vấn đề với tên field của file.' });
       }
-      // Các lỗi multer khác
       return res.status(400).json({ message: `Lỗi upload file: ${error.message}` });
     }
-    // Lỗi này có thể do `cb(new Error('...'))` trong fileFilter của route
+
+    // Lỗi có thể do `cb(new Error('...'))` trong fileFilter của route được ném ra
+    // Hoặc lỗi chung từ service không có statusCode cụ thể
+    // (Mặc dù service đã cố gắng throw error có statusCode cho các lỗi nghiệp vụ)
     if (error.message && (error.message.includes('Loại file không hợp lệ') || error.message.includes('Lỗi: Chỉ cho phép upload'))) {
         return res.status(400).json({ message: error.message });
     }
 
     console.error("Lỗi server khi nộp đơn:", error);
-    res.status(500).json({ message: 'Lỗi server', errorDetails: error.message });
+    res.status(500).json({ message: 'Lỗi server không xác định', errorDetails: error.message });
   }
 };
 
 // Lấy danh sách đơn xét tuyển của user
 export const getDonXetTuyenByUser = async (req, res) => {
   try {
-    const donXetTuyenList = await DonXetTuyen.find({ userId: req.params.userId })
-      .populate('truongId', 'tenTruong maTruong') // Chỉ lấy các trường cần thiết từ Trường
-      .populate('nganhId', 'tenNganh maNganh');    // Chỉ lấy các trường cần thiết từ Ngành
+    const donXetTuyenList = await getDonXetTuyenByUserService(req.params.userId);
     res.json(donXetTuyenList);
   } catch (error) {
     console.error("Lỗi khi lấy đơn xét tuyển của user:", error);
-    res.status(500).json({ message: 'Lỗi server', error: error.message });
+    // Lỗi từ service thường là lỗi chung ở đây
+    res.status(500).json({ message: error.message || 'Lỗi server khi lấy danh sách đơn xét tuyển' });
   }
 };
 
@@ -176,48 +108,37 @@ export const updateTrangThaiDon = async (req, res) => {
     if (!trangThai) {
         return res.status(400).json({ message: "Trạng thái là bắt buộc."});
     }
-    // Kiểm tra xem trangThai có nằm trong enum của schema không
-    const validStatuses = DonXetTuyen.schema.path('trangThai').enumValues;
-    if (!validStatuses.includes(trangThai)) {
-        return res.status(400).json({ message: `Trạng thái không hợp lệ. Các trạng thái hợp lệ là: ${validStatuses.join(', ')}`});
-    }
 
-    const donXetTuyen = await DonXetTuyen.findByIdAndUpdate(
-      req.params.id,
-      { trangThai, updatedAt: Date.now() }, // updatedAt sẽ được cập nhật bởi pre('save') hoặc pre('findOneAndUpdate') nếu bạn thêm
-      { new: true, runValidators: true } // runValidators để đảm bảo trangThai hợp lệ
-    );
-
-    if (!donXetTuyen) {
-      return res.status(404).json({ message: 'Không tìm thấy đơn xét tuyển để cập nhật' });
-    }
+    const donXetTuyen = await updateTrangThaiDonService(req.params.id, trangThai);
     res.json(donXetTuyen);
+
   } catch (error) {
-    if (error.name === 'ValidationError') {
+    if (error.name === 'ValidationError') { // Từ runValidators trong service
       let errors = {};
       Object.keys(error.errors).forEach((key) => {
         errors[key] = error.errors[key].message;
       });
-      return res.status(400).json({ message: "Dữ liệu không hợp lệ", errors });
+      return res.status(400).json({ message: "Dữ liệu không hợp lệ cho trạng thái", errors });
+    }
+    if (error.statusCode) { // Lỗi nghiệp vụ từ service (trạng thái không hợp lệ, không tìm thấy đơn)
+        return res.status(error.statusCode).json({ message: error.message });
     }
     console.error("Lỗi khi cập nhật trạng thái đơn:", error);
-    res.status(500).json({ message: 'Lỗi server', error: error.message });
+    res.status(500).json({ message: error.message || 'Lỗi server khi cập nhật trạng thái đơn' });
   }
 };
 
 // Lấy chi tiết một đơn xét tuyển
 export const getDonXetTuyenById = async (req, res) => {
   try {
-    const donXetTuyen = await DonXetTuyen.findById(req.params.id)
-      .populate('truongId', 'tenTruong maTruong website diaChi')
-      .populate('nganhId', 'tenNganh maNganh chiTieu phuongThucXetTuyen toHopXetTuyen');
-    if (!donXetTuyen) {
-      return res.status(404).json({ message: 'Không tìm thấy đơn xét tuyển' });
-    }
+    const donXetTuyen = await getDonXetTuyenByIdService(req.params.id);
     res.json(donXetTuyen);
   } catch (error) {
+    if (error.statusCode === 404) {
+        return res.status(404).json({ message: error.message });
+    }
     console.error("Lỗi khi lấy chi tiết đơn xét tuyển:", error);
-    res.status(500).json({ message: 'Lỗi server', error: error.message });
+    res.status(500).json({ message: error.message || 'Lỗi server khi lấy chi tiết đơn' });
   }
 };
 
