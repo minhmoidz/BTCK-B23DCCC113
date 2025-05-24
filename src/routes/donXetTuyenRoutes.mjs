@@ -5,6 +5,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs'; // Thêm module fs để kiểm tra/tạo thư mục
 import { fileURLToPath } from 'url'; // Để sử dụng __dirname trong ES Modules
+import { protect } from '../middleware/auth.middleware.mjs'; // Import middleware
 
 import {
   submitDonXetTuyen,
@@ -75,16 +76,17 @@ const upload = multer({
  * @swagger
  * /api/don-xet-tuyen/submit:
  *   post:
- *     summary: Nộp đơn xét tuyển
+ *     summary: Nộp đơn xét tuyển (Yêu cầu xác thực - Gửi Bearer Token)
  *     tags: [Đơn xét tuyển]
+ *     security:
+ *       - bearerAuth: [] # Thêm dòng này để chỉ định yêu cầu Bearer Token
  *     requestBody:
  *       required: true
  *       content:
  *         multipart/form-data:
  *           schema:
- *             type: object # Sửa lại schema cho Swagger để phản ánh đúng request body
- *             required: # Liệt kê các trường bắt buộc trong form body
- *               - userId
+ *             type: object
+ *             required: # Bỏ userId khỏi đây
  *               - hoTen
  *               - sdt
  *               - email
@@ -94,8 +96,7 @@ const upload = multer({
  *               - phuongThucXetTuyen
  *               - doiTuongUuTien
  *             properties:
- *               userId:
- *                 type: string
+ *               # userId: { type: 'string' } # Bỏ userId khỏi đây
  *               hoTen:
  *                 type: string
  *               sdt:
@@ -143,7 +144,7 @@ const upload = multer({
  */
 // Tên 'minhChungFiles' trong upload.array() phải khớp với thuộc tính 'name'
 // của input type="file" ở frontend.
-router.post('/submit', upload.array('minhChungFiles', 5), submitDonXetTuyen);
+router.post('/submit', protect, upload.array('minhChungFiles', 5), submitDonXetTuyen);
 
 /**
  * @swagger

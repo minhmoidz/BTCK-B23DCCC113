@@ -25,7 +25,25 @@ const cleanupUploadedFiles = (files) => {
 // Nộp đơn xét tuyển
 export const submitDonXetTuyen = async (req, res) => {
   try {
-    const { ...donXetTuyenBody } = req.body;
+    const { 
+      hoTen,
+      sdt,
+      email,
+      ngaySinh,
+      truongId,
+      nganhId,
+      phuongThucXetTuyen,
+      toHopXetTuyen, 
+      diemThi,       
+      diemHocBa,     
+      doiTuongUuTien
+    } = req.body;
+
+    const userId = req.user.userId;
+
+    if (!userId) {
+        return res.status(401).json({ message: 'Không tìm thấy thông tin người dùng đã xác thực.'});
+    }
 
     // Xử lý file minh chứng
     const minhChungData = [];
@@ -41,7 +59,18 @@ export const submitDonXetTuyen = async (req, res) => {
 
     // Gộp body và thông tin minh chứng
     const donXetTuyenDataForService = {
-      ...donXetTuyenBody,
+      userId,
+      hoTen,
+      sdt,
+      email,
+      ngaySinh,
+      truongId,
+      nganhId,
+      phuongThucXetTuyen,
+      toHopXetTuyen, 
+      diemThi,       
+      diemHocBa,     
+      doiTuongUuTien,
       minhChung: minhChungData
     };
 
