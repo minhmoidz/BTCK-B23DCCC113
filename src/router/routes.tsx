@@ -1,15 +1,21 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Home from '../pages/trangchu/Home';
-import Dashboard from '../pages/dashboard/Dashboard';
 import MajorDetail from '../pages/nganhhoc/MajorDetail';
 import ChatPage from '../pages/hotro/chatbot';
 import XetTuyen from '../pages/xettuyen/XetTuyen';
 import ThanhToan from '../pages/thanhtoan/ThanhToan';
 import TheoDoiHoSoTraCuu from '../pages/tracuu/TraCuu';
 import SimpleAuthPage from '../component/login';
-import AdminPage from '../pages/admin/AdminPage';
 
+// Import các component Admin
+import ProfileManager from '../pages/admin/ProfileManager';
+import ConfigManager from '../pages/admin/ConfigManager';
+import AdminLayout from '../pages/admin/AdminLayout';
+import Test from '../pages/admin/ChonTruong';
+import AdmissionManagement from '../pages/admin/ChiTieuManager';
+import DashboardAdmin from '../pages/admin/DashboardAdmin';
+import Dashboard from '../pages/dashboard/Dashboard';
 
 interface RouterProps {
   loggedInUser: string | null;
@@ -35,8 +41,14 @@ const Router: React.FC<RouterProps> = ({ loggedInUser, onLogin, onLogout }) => (
       <Route path="/major/:slug" element={<MajorDetail />} />
       <Route path="/chat" element={<ChatPage />} />
 
-      {/* Trang Admin */}
-      <Route path="/admin" element={<AdminPage />} />
+      {/* Trang Admin với các route con */}
+      <Route path="/admin" element={<AdminLayout/>}>
+        <Route index element={<DashboardAdmin />} />
+        <Route path="chi-tieu" element={<AdmissionManagement />} />
+        <Route path="xet-tuyen" element={<Test/>} />
+        <Route path="ho-so" element={<ProfileManager />} />
+        <Route path="cau-hinh" element={<ConfigManager />} />
+      </Route>
 
       {/* Trang Dashboard riêng biệt */}
       <Route
