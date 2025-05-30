@@ -1,7 +1,7 @@
 import express from 'express';
-import { schoolRoutes } from './schools.mjs';
-import { applicationRoutes } from './applications.mjs';
-import { statisticsRoutes } from './statistics.mjs';
+import { schoolRoutes } from './schools.public.routes.mjs';
+import { applicationRoutes } from './applications.public.routes.mjs';
+import { statisticsRoutes } from './statistics.public.routes.mjs';
 
 const router = express.Router();
 

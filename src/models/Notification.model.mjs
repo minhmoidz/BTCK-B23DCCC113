@@ -1,4 +1,5 @@
-// models/Notification.mjs
+import mongoose from 'mongoose';
+
 const notificationSchema = new mongoose.Schema({
     profileId: { type: String, required: true },
     userId: { type: String, required: true },
@@ -10,4 +11,5 @@ const notificationSchema = new mongoose.Schema({
     method: { type: String, enum: ['email', 'sms', 'both'], default: 'email' },
     createdAt: { type: Date, default: Date.now }
   });
-  
+
+export default mongoose.model('Notification', notificationSchema); 

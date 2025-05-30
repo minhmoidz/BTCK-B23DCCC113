@@ -1,4 +1,3 @@
-// models/SubjectGroup.mjs
 import mongoose from 'mongoose';
 
 const subjectGroupSchema = new mongoose.Schema({
@@ -12,4 +11,4 @@ const subjectGroupSchema = new mongoose.Schema({
 });
 
 subjectGroupSchema.index({ id: 1, schoolId: 1, majorId: 1 }, { unique: true });
-export default mongoose.model('SubjectGroup', subjectGroupSchema);
+export default mongoose.model('SubjectGroup', subjectGroupSchema); 

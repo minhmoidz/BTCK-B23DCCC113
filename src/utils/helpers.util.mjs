@@ -30,4 +30,4 @@ export function getPhuongThucName(code) {
     'xthb': 'Xét tuyển kết hợp'
   };
   return phuongThucMap[code] || code;
-}
+} 

@@ -1,4 +1,3 @@
-// models/School.mjs
 import mongoose from 'mongoose';
 
 const schoolSchema = new mongoose.Schema({
@@ -9,4 +8,4 @@ const schoolSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
-export default mongoose.model('School', schoolSchema);
+export default mongoose.model('School', schoolSchema); 

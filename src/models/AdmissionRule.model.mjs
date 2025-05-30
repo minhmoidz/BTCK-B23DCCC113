@@ -37,4 +37,4 @@ const admissionRuleSchema = new mongoose.Schema({
 
 admissionRuleSchema.index({ schoolId: 1, majorId: 1, academicYear: 1 }, { unique: true });
 
-export default mongoose.model('AdmissionRule', admissionRuleSchema);
+export default mongoose.model('AdmissionRule', admissionRuleSchema); 

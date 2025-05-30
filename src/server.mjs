@@ -3,11 +3,11 @@ import express from 'express';
 import cors from 'cors';
 import { router as authRouter } from './auth.mjs';
 import { router as mainRouter } from './routes/user/index.mjs';
-import { router as adminRouter } from './routes/admin.mjs';
+import { router as adminRouter } from './routes/admin/admin.routes.mjs';
 import { router as publicRoutes } from './routes/public/index.mjs';
 import fs from 'fs';
 import path from 'path';
-import connectDB from './data/db.mjs';
+import connectDB from './config/db.mjs';
 
 // Kết nối đến MongoDB Atlas
 connectDB();

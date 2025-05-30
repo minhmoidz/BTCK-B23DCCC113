@@ -1,7 +1,6 @@
-// utils/admissionFilter.mjs
-import Profile from '../models/Profile.mjs';
-import AdmissionQuota from '../models/loccv/AdmissionQuota.mjs';
-import AdmissionRule from '../models/loccv/AdmissionRule.mjs';
+import Profile from '../models/Profile.model.mjs';
+import AdmissionQuota from '../models/AdmissionQuota.model.mjs';
+import AdmissionRule from '../models/AdmissionRule.model.mjs';
 import { evaluate } from 'mathjs'; // Thư viện tính toán công thức
 
 // Hàm tính điểm xét tuyển theo công thức
@@ -156,4 +155,4 @@ export async function filterAllProfiles(schoolId, majorId, academicYear) {
     console.error('Lỗi khi lọc hồ sơ:', error);
     return { error: error.message };
   }
-}
+} 

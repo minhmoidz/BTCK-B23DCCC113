@@ -1,11 +1,11 @@
 import express from 'express';
-import schoolRoutes from './schools.mjs';
-import majorRoutes from './majors.mjs';
-import subjectGroupRoutes from './subjectGroups.mjs';
-import applicationRoutes from './applications.mjs';
-import profileRoutes from './profiles.mjs';
-import statisticsRoutes from './statistics.mjs';
-import admissionMethodRoutes from './admissionMethods.mjs';
+import schoolRoutes from './schools.user.routes.mjs';
+import majorRoutes from './majors.user.routes.mjs';
+import subjectGroupRoutes from './subjectGroups.user.routes.mjs';
+import applicationRoutes from './applications.user.routes.mjs';
+import profileRoutes from './profiles.user.routes.mjs';
+import statisticsRoutes from './statistics.user.routes.mjs';
+import admissionMethodRoutes from './admissionMethods.user.routes.mjs';
 
 const router = express.Router();
 

@@ -49,4 +49,4 @@ export const uploadFields = upload.fields([
   { name: 'chungChiNangKhieu', maxCount: 1 }
 ]);
 
-export default upload;
+export default upload; 

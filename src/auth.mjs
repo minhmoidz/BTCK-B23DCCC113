@@ -2,7 +2,7 @@ import express from 'express';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
-import User from './models/User.mjs';
+import User from './models/User.model.mjs';
 
 const router = express.Router();
 

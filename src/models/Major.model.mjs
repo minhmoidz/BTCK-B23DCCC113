@@ -1,4 +1,4 @@
-// models/Major.mjs
+// models/Major.model.mjs
 import mongoose from 'mongoose';
 
 const majorSchema = new mongoose.Schema({

@@ -1,4 +1,3 @@
-// models/AdmissionQuota.mjs
 import mongoose from 'mongoose';
 
 const admissionQuotaSchema = new mongoose.Schema({
@@ -21,4 +20,4 @@ const admissionQuotaSchema = new mongoose.Schema({
 // Tạo index cho việc tìm kiếm nhanh
 admissionQuotaSchema.index({ schoolId: 1, majorId: 1, academicYear: 1 }, { unique: true });
 
-export default mongoose.model('AdmissionQuota', admissionQuotaSchema);
+export default mongoose.model('AdmissionQuota', admissionQuotaSchema); 
