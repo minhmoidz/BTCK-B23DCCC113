@@ -140,6 +140,48 @@ export async function sendBulkAdmissionNotifications(admissionResults) {
 
 
 // --- API đăng ký: gửi OTP về email ---
+/**
+ * @swagger
+ * /api/auth/register:
+ *   post:
+ *     summary: Đăng ký tài khoản mới (bước 1 - gửi OTP)
+ *     tags: [Auth]
+ *     description: Tiếp nhận thông tin đăng ký ban đầu của người dùng và gửi mã OTP về email để xác thực.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - ten
+ *               - sdt
+ *               - email
+ *               - password
+ *             properties:
+ *               ten:
+ *                 type: string
+ *                 example: Nguyễn Văn A
+ *               sdt:
+ *                 type: string
+ *                 example: "0905123456"
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: "nguyenvana@example.com"
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 example: "matkhau123"
+ *                 minLength: 6
+ *     responses:
+ *       200:
+ *         description: Đã gửi mã OTP xác nhận đến email của bạn!
+ *       400:
+ *         description: Lỗi validation (thiếu thông tin, SĐT/email không hợp lệ, SĐT/email đã tồn tại).
+ *       500:
+ *         description: Lỗi gửi OTP!
+ */
 router.post('/register', validateRegistration, async (req, res) => {
   try {
     const { ten, sdt, email, password } = req.body;
@@ -163,6 +205,51 @@ router.post('/register', validateRegistration, async (req, res) => {
 });
 
 // --- API xác thực OTP và tạo tài khoản ---
+/**
+ * @swagger
+ * /api/auth/verify-registration:
+ *   post:
+ *     summary: Xác thực OTP và hoàn tất đăng ký (bước 2)
+ *     tags: [Auth]
+ *     description: Xác thực mã OTP người dùng nhập và tạo tài khoản nếu OTP hợp lệ.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - otp
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: "nguyenvana@example.com"
+ *               otp:
+ *                 type: string
+ *                 example: "123456"
+ *     responses:
+ *       201:
+ *         description: Đăng ký tài khoản thành công!
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 userId:
+ *                   type: string
+ *                   description: ID của người dùng mới được tạo.
+ *                 token:
+ *                   type: string
+ *                   description: Token xác thực (hiện tại là userId).
+ *       400:
+ *         description: Không tìm thấy thông tin đăng ký, OTP không hợp lệ hoặc đã hết hạn.
+ *       500:
+ *         description: Lỗi xác thực đăng ký!
+ */
 router.post('/verify-registration', validateEmail, async (req, res) => {
   try {
     const { email, otp } = req.body;
@@ -198,6 +285,60 @@ router.post('/verify-registration', validateEmail, async (req, res) => {
 });
 
 // --- API đăng nhập ---
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Đăng nhập vào hệ thống
+ *     tags: [Auth]
+ *     description: Xác thực thông tin đăng nhập (số điện thoại và mật khẩu) của người dùng.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - sdt
+ *               - password
+ *             properties:
+ *               sdt:
+ *                 type: string
+ *                 example: "0905123456"
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 example: "matkhau123"
+ *     responses:
+ *       200:
+ *         description: Đăng nhập thành công!
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     ten:
+ *                       type: string
+ *                     sdt:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                 token:
+ *                   type: string
+ *       400:
+ *         description: Thiếu thông tin SĐT hoặc mật khẩu.
+ *       401:
+ *         description: Số điện thoại hoặc mật khẩu không chính xác.
+ *       500:
+ *         description: Lỗi đăng nhập!
+ */
 router.post('/login', async (req, res) => {
   try {
     const { sdt, password } = req.body;
@@ -226,6 +367,41 @@ router.post('/login', async (req, res) => {
 });
 
 // --- API kiểm tra trạng thái đăng nhập ---
+/**
+ * @swagger
+ * /api/auth/me:
+ *   get:
+ *     summary: Lấy thông tin người dùng hiện tại
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: [] 
+ *     description: Trả về thông tin của người dùng đã đăng nhập (dựa trên token).
+ *     responses:
+ *       200:
+ *         description: Thông tin người dùng.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     ten:
+ *                       type: string
+ *                     sdt:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *       401:
+ *         description: Chưa xác thực hoặc token không hợp lệ.
+ *       404:
+ *         description: Không tìm thấy thông tin người dùng.
+ *       500:
+ *         description: Lỗi lấy thông tin người dùng.
+ */
 router.get('/me', authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
@@ -242,6 +418,46 @@ router.get('/me', authMiddleware, async (req, res) => {
 });
 
 // --- API gửi thông báo trúng tuyển cho một người ---
+/**
+ * @swagger
+ * /api/auth/send-admission-notification:
+ *   post:
+ *     summary: Gửi email thông báo trúng tuyển cho một thí sinh
+ *     tags: [Auth, Notifications]
+ *     description: Gửi email thông báo kết quả trúng tuyển đến một địa chỉ email cụ thể.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userEmail
+ *               - userName
+ *               - schoolName
+ *               - majorName
+ *               - method
+ *             properties:
+ *               userEmail:
+ *                 type: string
+ *                 format: email
+ *               userName:
+ *                 type: string
+ *               schoolName:
+ *                 type: string
+ *               majorName:
+ *                 type: string
+ *               method:
+ *                 type: string
+ *                 description: Tên phương thức xét tuyển.
+ *     responses:
+ *       200:
+ *         description: Đã gửi thông báo trúng tuyển thành công!
+ *       400:
+ *         description: Thiếu thông tin bắt buộc.
+ *       500:
+ *         description: Lỗi gửi email hoặc lỗi server.
+ */
 router.post('/send-admission-notification', async (req, res) => {
   try {
     const { userEmail, userName, schoolName, majorName, method } = req.body;
@@ -265,6 +481,50 @@ router.post('/send-admission-notification', async (req, res) => {
 });
 
 // --- API gửi thông báo trúng tuyển hàng loạt ---
+/**
+ * @swagger
+ * /api/auth/send-bulk-admission-notifications:
+ *   post:
+ *     summary: Gửi email thông báo trúng tuyển hàng loạt
+ *     tags: [Auth, Notifications]
+ *     description: Gửi email thông báo kết quả trúng tuyển cho một danh sách các thí sinh.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               admissionResults:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - userEmail
+ *                     - userName
+ *                     - schoolName
+ *                     - majorName
+ *                     - method
+ *                   properties:
+ *                     userEmail:
+ *                       type: string
+ *                       format: email
+ *                     userName:
+ *                       type: string
+ *                     schoolName:
+ *                       type: string
+ *                     majorName:
+ *                       type: string
+ *                     method:
+ *                       type: string
+ *     responses:
+ *       200:
+ *         description: Thông báo về kết quả gửi email hàng loạt.
+ *       400:
+ *         description: Dữ liệu admissionResults không phải là một mảng.
+ *       500:
+ *         description: Lỗi server.
+ */
 router.post('/send-bulk-admission-notifications', async (req, res) => {
   try {
     const { admissionResults } = req.body;

@@ -121,7 +121,10 @@ export const lookupApplication = async (req, res) => {
 // --- SCHOOLS ---
 export const getSchoolsPublic = async (req, res) => {
     try {
+        console.log('[PublicController] Attempting to fetch schools for /api/truong...');
         const schools = await School.find().sort('name');
+        console.log(`[PublicController] Found ${schools.length} schools.`);
+        
         res.json(schools.map(school => ({
             id: school.id,
             name: school.name
