@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Router from '../src/router/routes';
+import Router from './services/router/routes';
 import '@ant-design/v5-patch-for-react-19';
 const App: React.FC = () => {
   // Khởi tạo state từ localStorage nếu có

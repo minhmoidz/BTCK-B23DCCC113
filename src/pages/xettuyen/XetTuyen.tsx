@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Tabs, Button } from 'antd';
 import { FileTextOutlined, PlusOutlined } from '@ant-design/icons';
 import RootLayout from '../../component/dunglai/RootLayout';
-import XetTuyenForm from '../../component/dashboard/XetTuyenForm';
+import XetTuyenForm from '../../component/user/dashboard/XetTuyenForm';
 import NguyenVongList from '../../pages/xettuyen/NguyenVongList';
 
 const { TabPane } = Tabs;

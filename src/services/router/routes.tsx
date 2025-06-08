@@ -1,21 +1,22 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Home from '../pages/trangchu/Home';
-import MajorDetail from '../pages/nganhhoc/MajorDetail';
-import ChatPage from '../pages/hotro/chatbot';
-import XetTuyen from '../pages/xettuyen/XetTuyen';
-import ThanhToan from '../pages/thanhtoan/ThanhToan';
-import TheoDoiHoSoTraCuu from '../pages/tracuu/TraCuu';
-import SimpleAuthPage from '../component/login';
+import Home from '../../pages/trangchu/Home';
+import MajorDetail from '../../pages/nganhhoc/MajorDetail';
+import ChatPage from '../../pages/hotro/chatbot';
+import XetTuyen from '../../pages/xettuyen/XetTuyen';
+import ThanhToan from '../../pages/thanhtoan/ThanhToan';
+import TheoDoiHoSoTraCuu from '../../pages/tracuu/TraCuu';
+import SimpleAuthPage from '../../component/login';
 
 // Import các component Admin
-import ProfileManager from '../pages/admin/ProfileManager';
-import ConfigManager from '../pages/admin/ConfigManager';
-import AdminLayout from '../pages/admin/AdminLayout';
-import Test from '../pages/admin/ChonTruong';
-import AdmissionManagement from '../pages/admin/ChiTieuManager';
-import DashboardAdmin from '../pages/admin/DashboardAdmin';
-import Dashboard from '../pages/dashboard/Dashboard';
+import ProfileManager from '../../pages/admin/ProfileManager';
+import AdminLayout from '../../pages/admin/AdminLayout';
+import DashboardAdmin from '../../pages/admin/DashboardAdmin';
+import Dashboard from '../../pages/dashboard/Dashboard';
+import DetailedAdmissionRulesPage from '../../pages/admin/DetailedAdmissionRulesPage';
+import AdmissionManagement from '../../pages/admin/AdmissionManagement';
+import EducationManagement from '../../pages/admin/EducationManagement';
+import Chat from '../../component/admin/chat/Chat';
 
 interface RouterProps {
   loggedInUser: string | null;
@@ -45,9 +46,10 @@ const Router: React.FC<RouterProps> = ({ loggedInUser, onLogin, onLogout }) => (
       <Route path="/admin" element={<AdminLayout/>}>
         <Route index element={<DashboardAdmin />} />
         <Route path="chi-tieu" element={<AdmissionManagement />} />
-        <Route path="xet-tuyen" element={<Test/>} />
+        <Route path="xet-tuyen" element={<EducationManagement/>} />
         <Route path="ho-so" element={<ProfileManager />} />
-        <Route path="cau-hinh" element={<ConfigManager />} />
+        <Route path="cau-hinh" element={<DetailedAdmissionRulesPage />} />
+        <Route path="chat" element={<Chat />} />
       </Route>
 
       {/* Trang Dashboard riêng biệt */}

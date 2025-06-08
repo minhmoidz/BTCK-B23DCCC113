@@ -3,12 +3,13 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import AdminLayout from './AdminLayout';
 import XetTuyenManager from './XetTuyenManager';
 import ProfileManager from './ProfileManager';
-import ConfigManager from './ConfigManager';
 import { ConfigProvider } from 'antd';
 import viVN from 'antd/lib/locale/vi_VN';
 import 'antd/dist/reset.css';
-import Test from './ChonTruong';
-import AdmissionManagement from './ChiTieuManager';
+import Test from './EducationManagement';
+import DetailedAdmissionRulesPage from './DetailedAdmissionRulesPage';
+import AdmissionManagement from './AdmissionManagement';
+import Chat from '../../component/admin/chat/Chat';
 
 
 const Admin = () => {
@@ -38,7 +39,12 @@ const Admin = () => {
           } />
           <Route path="/cau-hinh" element={
             <AdminLayout>
-              <ConfigManager />
+              <DetailedAdmissionRulesPage />
+            </AdminLayout>
+          } />
+          <Route path="/chat" element={
+            <AdminLayout>
+              <Chat />
             </AdminLayout>
           } />
           
