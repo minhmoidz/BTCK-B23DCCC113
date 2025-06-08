@@ -1,0 +1,32 @@
+.dashboard-container {
+    padding: 24px;
+    background: #f0f2f5;
+    min-height: 100vh;
+  }
+  
+  .stat-card {
+    text-align: center;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .chart-container {
+    padding: 16px;
+  }
+  
+  .status-tag {
+    margin: 4px;
+    padding: 4px 12px;
+    border-radius: 16px;
+  }
+  
+  @media (max-width: 768px) {
+    .dashboard-container {
+      padding: 12px;
+    }
+    
+    .ant-col {
+      margin-bottom: 16px;
+    }
+  }
+  
