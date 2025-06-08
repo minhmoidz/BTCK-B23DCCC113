@@ -672,3 +672,183 @@ export const processAdmissionComplete = async (req, res) => {
         });
     }
 }; 
+// Lấy template quy tắc theo ngành
+export const getAdmissionRuleTemplate = async (req, res) => {
+    try {
+        const { majorId } = req.params;
+        
+        const templates = {
+            'CNTT': {
+                thpt: {
+                    subjectWeights: { toan: 2, ly: 1.5, anhVan: 1.2 },
+                    requiredSubjects: [{ subject: 'toan', minScore: 5 }]
+                },
+                hsa: {
+                    prioritySubjects: [
+                        { subject: 'toan', weight: 2, description: 'Môn chính ngành CNTT' },
+                        { subject: 'ly', weight: 1.5, description: 'Môn hỗ trợ tư duy logic' }
+                    ]
+                }
+            },
+            'Y': {
+                thpt: {
+                    subjectWeights: { sinh: 2, hoa: 1.8, ly: 1.2 },
+                    requiredSubjects: [
+                        { subject: 'sinh', minScore: 6 },
+                        { subject: 'hoa', minScore: 5.5 }
+                    ]
+                },
+                hsa: {
+                    prioritySubjects: [
+                        { subject: 'sinh', weight: 2.5, description: 'Môn cốt lõi ngành Y' },
+                        { subject: 'hoa', weight: 2, description: 'Môn quan trọng ngành Y' }
+                    ]
+                }
+            }
+        };
+        
+        const template = templates[majorId] || {
+            thpt: { subjectWeights: {}, requiredSubjects: [] },
+            hsa: { prioritySubjects: [], gradeWeights: {} }
+        };
+        
+        res.json(template);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Cập nhật quy tắc chi tiết
+export const updateDetailedAdmissionRules = async (req, res) => {
+    try {
+        const { schoolId, majorId, academicYear, method, rules } = req.body;
+        
+        if (!schoolId || !majorId || !academicYear || !method || !rules) {
+            return res.status(400).json({ error: 'Thiếu thông tin bắt buộc' });
+        }
+        
+        let admissionRule = await AdmissionRule.findOne({ schoolId, majorId, academicYear });
+        
+        if (!admissionRule) {
+            admissionRule = new AdmissionRule({ 
+                schoolId, 
+                majorId, 
+                academicYear, 
+                methods: {} 
+            });
+        }
+        
+        // Cập nhật quy tắc cho phương thức cụ thể
+        if (!admissionRule.methods) {
+            admissionRule.methods = {};
+        }
+        
+        admissionRule.methods[method] = {
+            ...admissionRule.methods[method],
+            ...rules
+        };
+        
+        admissionRule.updatedAt = Date.now();
+        await admissionRule.save();
+        
+        res.json({
+            message: `Đã cập nhật quy tắc xét tuyển ${method} thành công`,
+            rule: admissionRule.methods[method]
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Xem trước kết quả áp dụng quy tắc
+export const previewAdmissionRules = async (req, res) => {
+    try {
+        const { schoolId, majorId, academicYear, sampleData } = req.body;
+        
+        const rule = await AdmissionRule.findOne({ schoolId, majorId, academicYear });
+        if (!rule) {
+            return res.status(404).json({ error: 'Không tìm thấy quy tắc xét tuyển' });
+        }
+        
+        const previewResults = {};
+        
+        for (const [method, methodRule] of Object.entries(rule.methods)) {
+            if (sampleData[method]) {
+                previewResults[method] = calculateScorePreview(sampleData[method], methodRule);
+            }
+        }
+        
+        res.json({
+            rules: rule.methods,
+            previewResults,
+            sampleData
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Hàm helper tính điểm preview
+function calculateScorePreview(data, rule) {
+    let totalScore = 0;
+    let details = {};
+    
+    // Tính điểm THPT với hệ số
+    if (rule.subjectWeights) {
+        for (const [subject, weight] of Object.entries(rule.subjectWeights)) {
+            if (data[subject] && weight > 0) {
+                const weightedScore = data[subject] * weight;
+                totalScore += weightedScore;
+                details[subject] = {
+                    originalScore: data[subject],
+                    weight: weight,
+                    weightedScore: weightedScore
+                };
+            }
+        }
+    }
+    
+    // Tính điểm học bạ với ưu tiên môn
+    if (rule.prioritySubjects) {
+        rule.prioritySubjects.forEach(priority => {
+            if (data[priority.subject]) {
+                const weightedScore = data[priority.subject] * priority.weight;
+                totalScore += weightedScore;
+                details[priority.subject] = {
+                    originalScore: data[priority.subject],
+                    weight: priority.weight,
+                    weightedScore: weightedScore,
+                    description: priority.description
+                };
+            }
+        });
+    }
+    
+    return {
+        totalScore: Math.round(totalScore * 100) / 100,
+        details,
+        passedMinScore: totalScore >= (rule.minScore || 0)
+    };
+}
+
+// Lấy quy tắc theo phương thức cụ thể
+export const getAdmissionRuleByMethod = async (req, res) => {
+    try {
+        const { schoolId, majorId, academicYear, method } = req.params;
+        
+        const rule = await AdmissionRule.findOne({ schoolId, majorId, academicYear });
+        if (!rule || !rule.methods[method]) {
+            return res.status(404).json({ error: 'Không tìm thấy quy tắc cho phương thức này' });
+        }
+        
+        res.json({
+            method,
+            rules: rule.methods[method],
+            schoolId,
+            majorId,
+            academicYear
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};

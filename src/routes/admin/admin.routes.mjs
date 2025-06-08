@@ -24,7 +24,11 @@ import {
     completeAdmissionProcess,
     getProfiles,
     updateProfileStatus,
-    processAdmissionComplete
+    processAdmissionComplete,
+    getAdmissionRuleTemplate,
+    updateDetailedAdmissionRules,
+    previewAdmissionRules,
+    getAdmissionRuleByMethod
 } from '../../controllers/admin.controller.mjs';
 
 const router = express.Router();
@@ -70,6 +74,11 @@ router.post('/admission-process/complete', completeAdmissionProcess);
 // --- API QUẢN LÝ HỒ SƠ ---
 router.get('/profiles', getProfiles);
 router.post('/profiles/:id/status', updateProfileStatus);
+// --- API QUẢN LÝ QUY TẮC XÉT TUYỂN CHI TIẾT ---
+router.get('/admission-rules/template/:majorId', getAdmissionRuleTemplate);
+router.put('/admission-rules/detailed', updateDetailedAdmissionRules);
+router.post('/admission-rules/preview', previewAdmissionRules);
+router.get('/admission-rules/:schoolId/:majorId/:academicYear/:method', getAdmissionRuleByMethod);
 
 // Thêm route mới đã có trong controller
 router.post('/process-admission-complete', processAdmissionComplete);
