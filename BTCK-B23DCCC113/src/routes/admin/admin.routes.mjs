@@ -28,7 +28,10 @@ import {
     getAdmissionRuleTemplate,
     updateDetailedAdmissionRules,
     previewAdmissionRules,
-    getAdmissionRuleByMethod
+    getAdmissionRuleByMethod,
+    createNotification,
+    updateNotification,
+    deleteNotification
 } from '../../controllers/admin.controller.mjs';
 
 const router = express.Router();
@@ -79,6 +82,11 @@ router.get('/admission-rules/template/:majorId', getAdmissionRuleTemplate);
 router.put('/admission-rules/detailed', updateDetailedAdmissionRules);
 router.post('/admission-rules/preview', previewAdmissionRules);
 router.get('/admission-rules/:schoolId/:majorId/:academicYear/:method', getAdmissionRuleByMethod);
+
+// --- API QUẢN LÝ THÔNG BÁO ---
+router.post('/notifications', createNotification);
+router.put('/notifications/:id', updateNotification);
+router.delete('/notifications/:id', deleteNotification);
 
 // Thêm route mới đã có trong controller
 router.post('/process-admission-complete', processAdmissionComplete);

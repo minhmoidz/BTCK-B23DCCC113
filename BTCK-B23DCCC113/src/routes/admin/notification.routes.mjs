@@ -1,31 +1,26 @@
 import express from 'express';
-import { 
-    createNotification,
-    updateNotification,
-    togglePinNotification,
-    deleteNotification,
-    getAdminNotifications
-} from '../../controllers/admin.controller.mjs';
-import { verifyToken, isAdmin } from '../../middleware/auth.middleware.mjs';
+import {
+  createNotification,
+  getAllNotifications,
+  getNotification,
+  updateNotification,
+  deleteNotification,
+  togglePin,
+  toggleImportant
+} from '../../controllers/notificationController.mjs';
+import { authMiddleware, isAdmin } from '../../auth.mjs';
 
 const router = express.Router();
 
-// Áp dụng middleware xác thực và phân quyền admin cho tất cả các routes
-router.use(verifyToken, isAdmin);
+// Các route cho thông báo - yêu cầu xác thực và quyền admin
+router.post('/', authMiddleware, isAdmin, createNotification);
+router.get('/', getAllNotifications);
+router.get('/:id', getNotification);
+router.put('/:id', authMiddleware, isAdmin, updateNotification);
+router.delete('/:id', authMiddleware, isAdmin, deleteNotification);
 
-// Tạo thông báo mới
-router.post('/', createNotification);
+// Routes mới cho việc ghim và đánh dấu quan trọng
+router.patch('/:id/toggle-pin', togglePin);
+router.patch('/:id/toggle-important', toggleImportant);
 
-// Lấy danh sách thông báo (có lọc và phân trang)
-router.get('/', getAdminNotifications);
-
-// Cập nhật thông báo
-router.put('/:id', updateNotification);
-
-// Ghim/bỏ ghim thông báo
-router.patch('/:id/toggle-pin', togglePinNotification);
-
-// Xóa thông báo
-router.delete('/:id', deleteNotification);
-
-export default router; 
+export const notificationRoutes = router; 

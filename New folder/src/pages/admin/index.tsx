@@ -10,7 +10,7 @@ import Test from './EducationManagement';
 import DetailedAdmissionRulesPage from './DetailedAdmissionRulesPage';
 import AdmissionManagement from './AdmissionManagement';
 import Chat from '../../component/admin/chat/Chat';
-import NotificationManager from './NotificationManager';
+import NotificationManagement from './NotificationManagement';
 
 const Admin = () => {
   return (
@@ -37,11 +37,6 @@ const Admin = () => {
               <ProfileManager />
             </AdminLayout>
           } />
-          <Route path="/qly-thong-bao" element={
-            <AdminLayout>
-              <NotificationManager />
-            </AdminLayout>
-          } />
           <Route path="/cau-hinh" element={
             <AdminLayout>
               <DetailedAdmissionRulesPage />
@@ -50,6 +45,11 @@ const Admin = () => {
           <Route path="/chat" element={
             <AdminLayout>
               <Chat />
+            </AdminLayout>
+          } />
+          <Route path="/thong-bao" element={
+            <AdminLayout>
+              <NotificationManagement />
             </AdminLayout>
           } />
         </Routes>

@@ -7,7 +7,6 @@ import AdmissionRule from '../models/AdmissionRule.model.mjs';
 import { filterAllProfiles } from '../services/admissionFilter.service.mjs';
 import { sendBulkAdmissionNotifications } from '../auth.mjs';
 import User from '../models/User.model.mjs'; // Thêm User model
-import Notification from '../models/Notification.model.mjs';
 
 // Hàm helper để chuyển đổi tên phương thức
 function getMethodName(method) {
@@ -853,200 +852,115 @@ export const getAdmissionRuleByMethod = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+import Notification from '../models/Notification.mjs';
 
-// Các chức năng quản lý thông báo
+// Tạo thông báo mới
 export const createNotification = async (req, res) => {
-    try {
-        const {
-            title,
-            content,
-            type = 'normal',
-            scheduledFor,
-            visibility = 'all_users',
-            targetAudience,
-            targetRoles,
-            isPinned = false,
-            expiresAt,
-            metadata
-        } = req.body;
+  try {
+    const { title, content, description } = req.body;
+    
+    const notification = new Notification({
+      title,
+      content,
+      description
+    });
 
-        // Kiểm tra các trường bắt buộc
-        if (!title || !content) {
-            return res.status(400).json({
-                success: false,
-                message: 'Tiêu đề và nội dung là bắt buộc'
-            });
-        }
-
-        // Tạo đối tượng thông báo
-        const notification = new Notification({
-            title,
-            content,
-            sender: req.user._id, // Admin tạo thông báo
-            type,
-            isPinned,
-            scheduledFor,
-            expiresAt,
-            status: scheduledFor ? 'scheduled' : 'published',
-            visibility,
-            targetAudience,
-            targetRoles,
-            metadata,
-            publishedAt: scheduledFor ? null : new Date()
-        });
-
-        await notification.save();
-
-        return res.status(201).json({
-            success: true,
-            message: 'Tạo thông báo thành công',
-            data: notification
-        });
-    } catch (error) {
-        console.error('Lỗi khi tạo thông báo:', error);
-        return res.status(500).json({
-            success: false,
-            message: 'Lỗi server',
-            error: error.message
-        });
-    }
+    await notification.save();
+    
+    res.status(201).json({
+      success: true,
+      message: 'Thông báo đã được tạo thành công',
+      data: notification
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: 'Không thể tạo thông báo',
+      error: error.message
+    });
+  }
 };
 
+// Lấy danh sách tất cả thông báo
+export const getAllNotifications = async (req, res) => {
+  try {
+    const notifications = await Notification.find()
+      .sort({ createdAt: -1 }); // Sắp xếp theo thời gian tạo mới nhất
+    
+    res.status(200).json({
+      success: true,
+      count: notifications.length,
+      data: notifications
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: 'Không thể lấy danh sách thông báo',
+      error: error.message
+    });
+  }
+};
+
+// Cập nhật thông báo
 export const updateNotification = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const updateData = req.body;
+  try {
+    const { title, content, description } = req.body;
+    
+    const notification = await Notification.findByIdAndUpdate(
+      req.params.id,
+      {
+        title,
+        content,
+        description
+      },
+      {
+        new: true,
+        runValidators: true
+      }
+    );
 
-        // Tìm và cập nhật thông báo
-        const notification = await Notification.findById(id);
-        
-        if (!notification) {
-            return res.status(404).json({
-                success: false,
-                message: 'Không tìm thấy thông báo'
-            });
-        }
-
-        // Không cho phép cập nhật một số trường nếu thông báo đã được đăng
-        if (notification.status === 'published') {
-            delete updateData.scheduledFor;
-            delete updateData.status;
-        }
-
-        // Cập nhật thông báo
-        Object.assign(notification, updateData);
-        await notification.save();
-
-        return res.status(200).json({
-            success: true,
-            message: 'Cập nhật thông báo thành công',
-            data: notification
-        });
-    } catch (error) {
-        console.error('Lỗi khi cập nhật thông báo:', error);
-        return res.status(500).json({
-            success: false,
-            message: 'Lỗi server',
-            error: error.message
-        });
+    if (!notification) {
+      return res.status(404).json({
+        success: false,
+        message: 'Không tìm thấy thông báo'
+      });
     }
+
+    res.status(200).json({
+      success: true,
+      message: 'Thông báo đã được cập nhật thành công',
+      data: notification
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: 'Không thể cập nhật thông báo',
+      error: error.message
+    });
+  }
 };
 
-export const togglePinNotification = async (req, res) => {
-    try {
-        const { id } = req.params;
-        
-        const notification = await Notification.findById(id);
-        
-        if (!notification) {
-            return res.status(404).json({
-                success: false,
-                message: 'Không tìm thấy thông báo'
-            });
-        }
-
-        notification.isPinned = !notification.isPinned;
-        await notification.save();
-
-        return res.status(200).json({
-            success: true,
-            message: `Đã ${notification.isPinned ? 'ghim' : 'bỏ ghim'} thông báo thành công`,
-            data: notification
-        });
-    } catch (error) {
-        console.error('Lỗi khi thay đổi trạng thái ghim:', error);
-        return res.status(500).json({
-            success: false,
-            message: 'Lỗi server',
-            error: error.message
-        });
-    }
-};
-
+// Xóa thông báo
 export const deleteNotification = async (req, res) => {
-    try {
-        const { id } = req.params;
-        
-        const notification = await Notification.findById(id);
-        
-        if (!notification) {
-            return res.status(404).json({
-                success: false,
-                message: 'Không tìm thấy thông báo'
-            });
-        }
+  try {
+    const notification = await Notification.findByIdAndDelete(req.params.id);
 
-        await notification.deleteOne();
-
-        return res.status(200).json({
-            success: true,
-            message: 'Xóa thông báo thành công'
-        });
-    } catch (error) {
-        console.error('Lỗi khi xóa thông báo:', error);
-        return res.status(500).json({
-            success: false,
-            message: 'Lỗi server',
-            error: error.message
-        });
+    if (!notification) {
+      return res.status(404).json({
+        success: false,
+        message: 'Không tìm thấy thông báo'
+      });
     }
-};
 
-export const getAdminNotifications = async (req, res) => {
-    try {
-        const {
-            page = 1,
-            limit = 10,
-            status,
-            type,
-            isPinned
-        } = req.query;
-
-        const query = {};
-        
-        if (status) query.status = status;
-        if (type) query.type = type;
-        if (isPinned !== undefined) query.isPinned = isPinned;
-
-        const options = {
-            page: parseInt(page),
-            limit: parseInt(limit),
-            sort: { isPinned: -1, createdAt: -1 },
-            populate: 'sender'
-        };
-
-        const notifications = await Notification.paginate(query, options);
-
-        return res.status(200).json({
-            success: true,
-            data: notifications
-        });
-    } catch (error) {
-        console.error('Lỗi khi lấy danh sách thông báo:', error);
-        return res.status(500).json({
-            success: false,
-            message: 'Lỗi server',
-            error: error.message
-        });
-    }
-};
+    res.status(200).json({
+      success: true,
+      message: 'Thông báo đã được xóa thành công'
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: 'Không thể xóa thông báo',
+      error: error.message
+    });
+  }
+}; 

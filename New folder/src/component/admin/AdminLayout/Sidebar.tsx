@@ -11,9 +11,9 @@ const menuItems = [
   { key: 'chi-tieu', icon: <FileOutlined />, label: 'Quản lý Xét tuyển' },
   { key: 'xet-tuyen', icon: <BankOutlined />, label: 'Quản lý Ngành, Trường' },
   { key: 'ho-so', icon: <UserOutlined />, label: 'Quản lý Hồ sơ' },
+  { key: 'thong-bao', icon: <BellOutlined />, label: 'Quản lý Thông báo' },
   { key: 'chat', icon: <SettingOutlined />, label: 'Cấu hình hệ thống' },
   { key: 'cau-hinh', icon: <SettingOutlined />, label: 'Cấu hình hệ thống' },
-  { key: 'qly-thong-bao', icon: <BellOutlined />, label: 'Quản lý Thông báo' },
 ];
 
 const Sidebar = ({ collapsed, setCollapsed }) => {

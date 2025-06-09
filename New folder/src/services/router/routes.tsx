@@ -40,7 +40,7 @@ import DetailedAdmissionRulesPage from '../../pages/admin/DetailedAdmissionRules
 import AdmissionManagement from '../../pages/admin/AdmissionManagement';
 import EducationManagement from '../../pages/admin/EducationManagement';
 import Chat from '../../component/admin/chat/Chat';
-import NotificationManager from '../../pages/admin/NotificationManager';
+import NotificationManagement from '../../pages/admin/NotificationManagerment';
 
 interface RouterProps {
   loggedInUser: string | null;
@@ -97,7 +97,8 @@ const Router: React.FC<RouterProps> = ({ loggedInUser, onLogin, onLogout }) => (
         <Route path="ho-so" element={<ProfileManager />} />
         <Route path="cau-hinh" element={<DetailedAdmissionRulesPage />} />
         <Route path="chat" element={<Chat />} />
-        <Route path="qly-thong-bao" element={<NotificationManager />} />
+        <Route path="thong-bao" element={<NotificationManagement />} />
+
       </Route>
 
       {/* Trang Dashboard riêng biệt */}

@@ -6,6 +6,7 @@ import { router as mainRouter } from './routes/user/index.mjs'; // Tuyến đư�
 import { router as adminRouter } from './routes/admin/admin.routes.mjs'; // Tuyến đường cho quản trị viên
 import { router as publicRoutes } from './routes/public/index.mjs'; // Tuyến đường công khai (danh sách trường, ngành,...)
 import { chanceRoutes } from './routes/chance.routes.mjs'; // Sửa ở đây: import đúng tên đã export
+import { notificationRoutes } from './routes/admin/notification.routes.mjs'; // Import routes thông báo
 import fs from 'fs';
 import path from 'path';
 import connectDB from './config/db.mjs'; // Hàm kết nối cơ sở dữ liệu
@@ -191,6 +192,7 @@ app.use('/api', mainRouter);      // API cho User (cần xác thực)
 app.use('/api', publicRoutes);   // API Công khai (không cần xác thực)
 app.use('/api/admin', adminRouter);  // API cho Admin (cần quyền admin)
 app.use('/api/chance', chanceRoutes); // API cho Xét Khả năng Trúng Tuyển
+app.use('/api/notifications', notificationRoutes); // API cho Thông báo
 
 // Phục vụ Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
