@@ -1,40 +1,47 @@
 import React from 'react';
-import { Card, Typography, Steps } from 'antd';
+import { Steps, Typography, Alert } from 'antd';
 
-const { Title, Paragraph } = Typography;
+const { Title } = Typography;
 
 const steps = [
   {
     title: 'Tạo tài khoản',
-    desc: 'Đăng ký tài khoản thí sinh trên hệ thống bằng email và số điện thoại.'
+    description: 'Đăng ký tài khoản thí sinh trên hệ thống.'
   },
   {
-    title: 'Điền thông tin hồ sơ',
-    desc: 'Nhập đầy đủ thông tin cá nhân, ngành dự thi, tải lên giấy tờ cần thiết.'
+    title: 'Đăng nhập',
+    description: 'Đăng nhập vào hệ thống bằng tài khoản đã tạo.'
   },
   {
-    title: 'Chọn ca thi & nộp lệ phí',
-    desc: 'Lựa chọn ca thi phù hợp và hoàn thành nộp lệ phí dự thi.'
+    title: 'Khai báo hồ sơ',
+    description: 'Nhập thông tin cá nhân, chọn ngành, trường và nguyện vọng.'
   },
   {
-    title: 'Nhận phiếu dự thi',
-    desc: 'Sau khi xác nhận, nhận phiếu dự thi và thông tin phòng thi qua email.'
+    title: 'Nộp lệ phí',
+    description: 'Thanh toán lệ phí dự thi/xét tuyển theo hướng dẫn.'
+  },
+  {
+    title: 'Tham gia kỳ thi',
+    description: 'Tham dự kỳ thi ĐGNL/ĐGTD theo lịch đã đăng ký.'
+  },
+  {
+    title: 'Tra cứu kết quả',
+    description: 'Xem điểm thi, kết quả xét tuyển và tra cứu thông báo.'
   },
 ];
 
 const Guide: React.FC = () => (
-  <Card style={{ borderRadius: 16, marginBottom: 32 }} bodyStyle={{ padding: 32 }}>
-    <Title level={3} style={{ color: '#4da3ff', marginBottom: 24 }}>Hướng dẫn đăng ký dự thi</Title>
-    <Steps
-      direction="vertical"
-      size="default"
-      current={-1}
-      items={steps.map(s => ({ title: s.title, description: s.desc }))}
+  <div style={{ margin: '32px 0' }}>
+    <Title level={4} style={{ color: '#4da3ff', marginBottom: 16 }}>Các bước đăng ký dự thi & xét tuyển đại học</Title>
+    <Steps direction="vertical" size="small" current={-1} items={steps} />
+    <Alert
+      style={{ marginTop: 24 }}
+      message="Tip hữu ích"
+      description="Hãy chuẩn bị đầy đủ giấy tờ, kiểm tra kỹ thông tin cá nhân và thường xuyên theo dõi thông báo mới nhất trên hệ thống để không bỏ lỡ các mốc quan trọng!"
+      type="info"
+      showIcon
     />
-    <Paragraph style={{ marginTop: 24, color: '#333' }}>
-      Nếu cần hỗ trợ thêm, vui lòng liên hệ bộ phận tuyển sinh hoặc sử dụng chat trực tuyến ở góc phải màn hình.
-    </Paragraph>
-  </Card>
+  </div>
 );
 
 export default Guide; 

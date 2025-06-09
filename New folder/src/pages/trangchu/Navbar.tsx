@@ -7,42 +7,47 @@ const menuItems = [
   {
     label: 'HƯỚNG DẪN', key: 'guide',
     children: [
-      { label: 'Quy chế thi', key: 'guide1' },
-      { label: 'Đề án thi', key: 'guide2' },
-      { label: 'Dạng thức bài thi', key: 'guide3' },
-      { label: 'Thỏa thuận', key: 'guide4' },
-      { label: 'Đăng ký thi', key: 'guide5' },
-      { label: 'Nộp lệ phí', key: 'guide6' },
-      { label: 'Cẩm nang HSA', key: 'guide7' },
+      { label: 'Quy chế & Hướng dẫn thi', key: 'guide1', link: '/huong-dan/quy-che-thi' },
+      { label: 'Đăng ký dự thi & Xét tuyển', key: 'guide2', link: '/huong-dan/dang-ky' },
+      { label: 'Hướng dẫn nộp lệ phí', key: 'guide3', link: '/huong-dan/le-phi' },
+      { label: 'Hướng dẫn tra cứu kết quả', key: 'guide4', link: '/huong-dan/tra-cuu' },
+      { label: 'Câu hỏi thường gặp', key: 'guide5', link: '/huong-dan/faq' },
+      { label: 'Liên hệ hỗ trợ', key: 'guide6', link: '/huong-dan/lien-he' },
     ]
   },
   {
     label: 'KỲ THI', key: 'exam',
     children: [
-      { label: 'ĐGNL - HSA', key: 'exam1' },
-      { label: 'Sức khỏe - MSA', key: 'exam2' },
-      { label: 'Sau đại học', key: 'exam3' },
+      { label: 'Đánh giá năng lực (HSA)', key: 'exam1', link: '/ky-thi/hsa' },
+      { label: 'Đánh giá tư duy (TSA)', key: 'exam2', link: '/ky-thi/tsa' },
+      { label: 'Lịch sử & Ý nghĩa', key: 'exam3', link: '/ky-thi/lich-su' },
+      { label: 'Đề thi mẫu & Đáp án', key: 'exam4', link: '/ky-thi/de-thi-mau' },
     ]
   },
   {
     label: 'LỊCH THI', key: 'lichthi',
     children: [
-      { label: 'Lịch thi ĐGNL', key: 'lichthi1' },
-      { label: 'Lịch thi Sức khỏe', key: 'lichthi2' },
+      { label: 'Lịch thi ĐGNL', key: 'lichthi1', link: '/lich-thi/dgnl' },
+      { label: 'Lịch thi ĐGTD', key: 'lichthi2', link: '/lich-thi/dgtd' },
+      { label: 'Thời hạn đăng ký & nộp lệ phí', key: 'lichthi3', link: '/lich-thi/thoi-han' },
     ]
   },
   {
     label: 'TRA CỨU', key: 'tracuu',
     children: [
-      { label: 'Tra cứu điểm', key: 'tracuu1' },
-      { label: 'Tra cứu hồ sơ', key: 'tracuu2' },
+      { label: 'Tra cứu điểm thi', key: 'tracuu1', link: '/tra-cuu/diem' },
+      { label: 'Tra cứu hồ sơ xét tuyển', key: 'tracuu2', link: '/tra-cuu/ho-so' },
+      { label: 'Tra cứu lịch sử đăng ký', key: 'tracuu3', link: '/tra-cuu/lich-su' },
+      { label: 'Tra cứu thông báo cá nhân', key: 'tracuu4', link: '/tra-cuu/thong-bao' },
     ]
   },
   {
     label: 'DIỄN ĐÀN', key: 'forum',
     children: [
-      { label: 'Chia sẻ kinh nghiệm', key: 'forum1' },
-      { label: 'Hỏi đáp', key: 'forum2' },
+      { label: 'Chia sẻ kinh nghiệm ôn thi', key: 'forum1', link: '/dien-dan/kinh-nghiem' },
+      { label: 'Hỏi đáp về kỳ thi & xét tuyển', key: 'forum2', link: '/dien-dan/hoi-dap' },
+      { label: 'Góc phụ huynh & giáo viên', key: 'forum3', link: '/dien-dan/phu-huynh' },
+      { label: 'Tin tức tuyển sinh', key: 'forum4', link: '/dien-dan/tin-tuc' },
     ]
   },
 ];
@@ -50,9 +55,7 @@ const menuItems = [
 const Navbar: React.FC = () => {
   // Xử lý click submenu: chỉ alert text tượng trưng
   const handleMenuClick = (e: any) => {
-    if (e.keyPath.length > 1) {
-      alert(`Bạn vừa chọn: ${e.item.props.children || e.key}`);
-    }
+    // Không cần xử lý gì đặc biệt nếu đã có link
   };
 
   return (
@@ -88,10 +91,19 @@ const Navbar: React.FC = () => {
             return {
               key: item.key,
               label: item.label,
-              children: item.children.map(sub => ({
-                key: sub.key,
-                label: <span style={{ color: '#4da3ff', fontWeight: 600 }}>{sub.label}</span>
-              }))
+              children: item.children.map(sub => {
+                const labelContent = <span style={{ color: sub.link ? '#1677ff' : '#4da3ff', fontWeight: 600 }}>{sub.label}</span>;
+                if (sub.link) {
+                  return {
+                    key: sub.key,
+                    label: <Link to={sub.link}>{labelContent}</Link>
+                  };
+                }
+                return {
+                  key: sub.key,
+                  label: labelContent
+                };
+              })
             };
           }
           return {

@@ -15,27 +15,43 @@ const banners = [
 ];
 
 const Banner: React.FC = () => (
-  <div
+  <Carousel
+    autoplay
+    arrows
+    infinite
     style={{
-      background: '#222',
-      padding: '56px 0',
-      minHeight: 340,
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
+      width: '100%',
+      height: '550px',
+      overflow: 'hidden',
     }}
   >
-    <div style={{ width: '100%', maxWidth: 600 }}>
-      <Carousel autoplay dots>
-        {banners.map((b, idx) => (
-          <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <img src={b.img} alt={b.text} style={{ width: '100%', maxWidth: 520, height: 'auto', objectFit: 'cover', borderRadius: 16, marginBottom: 16 }} />
-            <Title level={3} style={{ color: '#fff', textAlign: 'center', margin: 0 }}>{b.text}</Title>
-          </div>
-        ))}
-      </Carousel>
-    </div>
-  </div>
+    {banners.map((b, idx) => (
+      <div key={idx} style={{ position: 'relative', width: '100%', height: '550px' }}>
+        <img
+          src={b.img}
+          alt={b.text}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+          }}
+        />
+        <div style={{
+          position: 'absolute',
+          bottom: 20,
+          width: '100%',
+          textAlign: 'center',
+          padding: '0 20px',
+        }}>
+          <Title level={2} style={{
+            color: '#fff',
+            textShadow: '0px 2px 4px rgba(0, 0, 0, 0.7)',
+            margin: 0,
+          }}>{b.text}</Title>
+        </div>
+      </div>
+    ))}
+  </Carousel>
 );
 
 export default Banner; 

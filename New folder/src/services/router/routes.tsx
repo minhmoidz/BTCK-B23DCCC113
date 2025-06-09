@@ -8,6 +8,7 @@ import ThanhToan from '../../pages/thanhtoan/ThanhToan';
 import TheoDoiHoSoTraCuu from '../../pages/tracuu/TraCuu';
 import SimpleAuthPage from '../../component/login';
 import NotificationPage from '../../pages/thongbao/NotificationPage';
+import QuyCheThi from '../../pages/huongdan/QuyCheThi';
 
 // Import các component Admin
 import ProfileManager from '../../pages/admin/ProfileManager';
@@ -44,6 +45,7 @@ const Router: React.FC<RouterProps> = ({ loggedInUser, onLogin, onLogout }) => (
       <Route path="/major/:slug" element={<MajorDetail />} />
       <Route path="/chat" element={<ChatPage />} />
       <Route path="/thong-bao" element={<NotificationPage />} />
+      <Route path="/huong-dan/quy-che-thi" element={<QuyCheThi />} />
 
       {/* Trang Admin với các route con */}
       <Route path="/admin" element={<AdminLayout/>}>
@@ -61,7 +63,7 @@ const Router: React.FC<RouterProps> = ({ loggedInUser, onLogin, onLogout }) => (
         path="/dashboard"
         element={
           loggedInUser ? (
-            <Dashboard username={loggedInUser} onLogout={onLogout} />
+            <Dashboard userId={loggedInUser} onLogout={onLogout} />
           ) : (
             <Navigate to="/login" replace />
           )

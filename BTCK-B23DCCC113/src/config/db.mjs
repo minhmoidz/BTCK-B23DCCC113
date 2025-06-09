@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 // Chuỗi kết nối MongoDB Atlas
-const MONGODB_URI = "mongodb://localhost:27017/";
+const MONGODB_URI = "mongodb+srv://minhtuantran210305:minhdz@tuyensinh.s1j9usk.mongodb.net/?retryWrites=true&w=majority&appName=tuyensinh";
 
 // Kết nối đến MongoDB
 async function connectDB() {
