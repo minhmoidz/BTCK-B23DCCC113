@@ -28,10 +28,14 @@ import {
     getAdmissionRuleTemplate,
     updateDetailedAdmissionRules,
     previewAdmissionRules,
-    getAdmissionRuleByMethod
+    getAdmissionRuleByMethod,
+    addUser
 } from '../../controllers/admin.controller.mjs';
 
 const router = express.Router();
+
+// --- API QUẢN LÝ NGƯỜI DÙNG ---
+router.post('/users', addUser);
 
 // Middleware xác thực admin cho tất cả routes
 router.use(isAdmin);

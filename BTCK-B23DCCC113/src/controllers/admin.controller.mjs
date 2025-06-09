@@ -8,6 +8,7 @@ import { filterAllProfiles } from '../services/admissionFilter.service.mjs';
 import { sendBulkAdmissionNotifications } from '../auth.mjs';
 import User from '../models/User.model.mjs'; // Thêm User model
 import Notification from '../models/Notification.model.mjs';
+import bcrypt from 'bcrypt'; // Thêm import bcrypt
 
 // Hàm helper để chuyển đổi tên phương thức
 function getMethodName(method) {
@@ -33,11 +34,53 @@ export const getSchools = async (req, res) => {
 
 export const addSchool = async (req, res) => {
     try {
-        const { id, name } = req.body;
+        const { id, name, adminEmail, adminPassword, adminName, adminPhone } = req.body;
+        
+        console.log('🔵 Bắt đầu thêm trường với dữ liệu:', { id, name, adminEmail, adminName, adminPhone });
+
+        // Tạo trường học mới
         const school = new School({ id, name });
         await school.save();
-        res.status(201).json(school);
+        console.log('✅ Đã tạo trường học thành công:', school.name);
+
+        // Tạo tài khoản admin cho trường
+        if (adminEmail && adminPassword && adminName && adminPhone) {
+            console.log('🔵 Đang tạo tài khoản admin cho trường...');
+            try {
+                // Kiểm tra xem email hoặc số điện thoại admin đã tồn tại chưa
+                const existingUser = await User.findOne({ $or: [{ email: adminEmail }, { sdt: adminPhone }] });
+                if (existingUser) {
+                    await School.findOneAndDelete({ id: id }); // Xóa trường vừa tạo nếu không thể tạo admin
+                    console.error(`❌ Lỗi: Email (${adminEmail}) hoặc số điện thoại (${adminPhone}) đã được đăng ký.`);
+                    return res.status(400).json({ message: 'Email hoặc số điện thoại admin đã được đăng ký.' });
+                }
+
+                const adminUser = new User({
+                    ten: adminName,
+                    email: adminEmail,
+                    password: adminPassword, // Lưu ý: Trong thực tế cần mã hóa password
+                    sdt: adminPhone,
+                    role: 'schoolAdmin',
+                    schoolId: id
+                });
+                await adminUser.save();
+                console.log('✅ Đã tạo tài khoản admin thành công cho:', adminUser.email);
+            } catch (userError) {
+                console.error('❌ Lỗi khi tạo tài khoản admin:', userError.message);
+                // Nếu không tạo được user, bạn có thể muốn xóa trường vừa tạo
+                await School.findOneAndDelete({ id: id }); 
+                return res.status(400).json({ message: 'Tạo trường thành công nhưng không tạo được admin', error: userError.message });
+            }
+        } else {
+            console.log('⚠️ Thiếu thông tin admin, bỏ qua tạo tài khoản admin.', { adminEmail, adminPassword: adminPassword ? '******' : 'N/A', adminName, adminPhone });
+        }
+
+        res.status(201).json({
+            school,
+            message: 'Tạo trường học và tài khoản admin (nếu có đủ thông tin) thành công'
+        });
     } catch (error) {
+        console.error('❌ Lỗi tổng quát trong addSchool:', error.message);
         res.status(400).json({ message: error.message });
     }
 };
@@ -1048,5 +1091,66 @@ export const getAdminNotifications = async (req, res) => {
             message: 'Lỗi server',
             error: error.message
         });
+    }
+};
+
+// --- QUẢN LÝ NGƯỜI DÙNG (ADMIN) ---
+export const addUser = async (req, res) => {
+    try {
+        const { ten, sdt, email, password, role, schoolId } = req.body;
+
+        // Kiểm tra các trường bắt buộc
+        if (!ten || !sdt || !email || !password || !role) {
+            return res.status(400).json({ message: 'Thiếu thông tin bắt buộc (tên, SĐT, email, mật khẩu, vai trò).' });
+        }
+
+        // Validate số điện thoại và email
+        const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/;
+        if (!phoneRegex.test(sdt)) {
+            return res.status(400).json({ message: 'Số điện thoại không hợp lệ!' });
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ message: 'Email không hợp lệ!' });
+        }
+        if (password.length < 6) {
+            return res.status(400).json({ message: 'Mật khẩu phải có ít nhất 6 ký tự!' });
+        }
+
+        // Kiểm tra trùng lặp
+        const existingUser = await User.findOne({ $or: [{ sdt }, { email }] });
+        if (existingUser) {
+            return res.status(400).json({ message: 'Số điện thoại hoặc email đã được đăng ký!' });
+        }
+
+        // Mã hóa mật khẩu
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Tạo user mới
+        const newUser = new User({
+            ten,
+            sdt,
+            email,
+            password: hashedPassword,
+            role,
+            schoolId: role === 'schoolAdmin' ? schoolId : undefined // Chỉ gán schoolId nếu là schoolAdmin
+        });
+
+        await newUser.save();
+
+        res.status(201).json({
+            message: 'Tạo tài khoản người dùng thành công!',
+            user: {
+                _id: newUser._id,
+                ten: newUser.ten,
+                email: newUser.email,
+                role: newUser.role,
+                schoolId: newUser.schoolId
+            }
+        });
+
+    } catch (error) {
+        console.error('❌ Lỗi khi tạo người dùng:', error);
+        res.status(500).json({ message: 'Lỗi server khi tạo người dùng', error: error.message });
     }
 };

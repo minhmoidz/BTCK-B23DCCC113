@@ -2,6 +2,10 @@
 export interface School {
     id: string;
     name: string;
+    adminEmail?: string;
+    adminPassword?: string;
+    adminName?: string;
+    adminPhone?: string;
   }
   
   export interface Major {

@@ -100,11 +100,24 @@ const EducationManagement: React.FC = () => {
   };
   const handleSchoolSubmit = async (values: School) => {
     try {
-      if (editingSchool) await axios.put(`${API_BASE_URL}/admin/schools/${editingSchool.id}`, values);
-      else await axios.post(`${API_BASE_URL}/admin/schools`, values);
-      setSchoolModalVisible(false); fetchSchools();
-      message.success(editingSchool ? 'Cập nhật trường thành công' : 'Thêm trường thành công');
-    } catch { message.error('Không thể lưu thông tin trường'); }
+      if (editingSchool) {
+        await axios.put(`${API_BASE_URL}/admin/schools/${editingSchool.id}`, values);
+        message.success('Cập nhật trường thành công');
+      } else {
+        // Generate a unique ID for the new school
+        const schoolId = `SCH${Date.now().toString().slice(-6)}`;
+        const schoolData = {
+          ...values,
+          id: schoolId
+        };
+        await axios.post(`${API_BASE_URL}/admin/schools`, schoolData);
+        message.success('Thêm trường và tài khoản quản trị viên thành công');
+      }
+      setSchoolModalVisible(false);
+      fetchSchools();
+    } catch (error) {
+      message.error('Không thể lưu thông tin trường');
+    }
   };
 
   // Major CRUD
