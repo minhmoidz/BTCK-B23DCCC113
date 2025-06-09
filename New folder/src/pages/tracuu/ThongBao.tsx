@@ -17,6 +17,18 @@ const ThongBao: React.FC = () => (
     <div style={{ maxWidth: 900, margin: '32px auto', background: '#fff', borderRadius: 12, padding: 32 }}>
       <Title level={2} style={{ textAlign: 'center', marginBottom: 32 }}>Tra cứu thông báo cá nhân</Title>
       <Card bordered={false} style={{ marginBottom: 24 }}>
+        <Typography.Paragraph>
+          <b>Hướng dẫn tra cứu:</b> Đăng nhập vào hệ thống, chọn mục "Thông báo cá nhân" để xem các thông báo quan trọng về hồ sơ, điểm thi, lịch thi, kết quả xét tuyển...
+        </Typography.Paragraph>
+        <Typography.Paragraph>
+          <b>Ý nghĩa các thông báo:</b> Thông báo xác nhận đăng ký, nộp lệ phí, công bố kết quả, nhắc nhở bổ sung hồ sơ... giúp thí sinh không bỏ lỡ các mốc quan trọng.
+        </Typography.Paragraph>
+        <Typography.Paragraph>
+          <b>Lưu ý:</b> Đọc kỹ nội dung, kiểm tra thời gian thông báo, lưu lại các thông báo quan trọng để đối chiếu khi cần thiết.
+        </Typography.Paragraph>
+        <Typography.Paragraph>
+          <b>Kinh nghiệm:</b> Bật thông báo trên email, điện thoại để không bỏ lỡ thông tin mới nhất từ hệ thống.
+        </Typography.Paragraph>
         <List
           dataSource={thongBao}
           renderItem={item => (
