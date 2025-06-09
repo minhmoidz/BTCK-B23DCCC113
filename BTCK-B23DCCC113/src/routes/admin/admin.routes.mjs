@@ -28,13 +28,17 @@ import {
     getAdmissionRuleTemplate,
     updateDetailedAdmissionRules,
     previewAdmissionRules,
-    getAdmissionRuleByMethod
+    getAdmissionRuleByMethod,
+    createSchoolAdmin
 } from '../../controllers/admin.controller.mjs';
 
 const router = express.Router();
 
 // Middleware xác thực admin cho tất cả routes
 router.use(isAdmin);
+
+// --- API QUẢN LÝ TÀI KHOẢN SCHOOL ADMIN ---
+router.post('/school-admin', createSchoolAdmin);
 
 // --- API QUẢN LÝ TRƯỜNG HỌC ---
 router.get('/schools', getSchools);

@@ -9,6 +9,82 @@ import { sendBulkAdmissionNotifications } from '../auth.mjs';
 import User from '../models/User.model.mjs'; // Thêm User model
 import Notification from '../models/Notification.model.mjs';
 
+// Tạo tài khoản school admin
+export const createSchoolAdmin = async (req, res) => {
+    try {
+        const { ten, sdt, email, password, schoolId } = req.body;
+
+        // Kiểm tra xem người dùng hiện tại có phải là super_admin không
+        if (req.user.role !== 'super_admin') {
+            return res.status(403).json({
+                success: false,
+                message: 'Chỉ super_admin mới có quyền tạo tài khoản school_admin'
+            });
+        }
+
+        // Kiểm tra trường bắt buộc
+        if (!ten || !sdt || !email || !password || !schoolId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Vui lòng cung cấp đầy đủ thông tin'
+            });
+        }
+
+        // Kiểm tra xem trường học có tồn tại không
+        const school = await School.findOne({ id: schoolId });
+        if (!school) {
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy trường học'
+            });
+        }
+
+        // Kiểm tra email và sdt đã tồn tại chưa
+        const existingUser = await User.findOne({
+            $or: [{ email }, { sdt }]
+        });
+
+        if (existingUser) {
+            return res.status(400).json({
+                success: false,
+                message: 'Email hoặc số điện thoại đã được sử dụng'
+            });
+        }
+
+        // Tạo tài khoản school_admin mới
+        const schoolAdmin = new User({
+            ten,
+            sdt,
+            email,
+            password, // Lưu ý: Trong thực tế cần mã hóa password
+            role: 'school_admin',
+            schoolId
+        });
+
+        await schoolAdmin.save();
+
+        return res.status(201).json({
+            success: true,
+            message: 'Tạo tài khoản school_admin thành công',
+            data: {
+                id: schoolAdmin._id,
+                ten: schoolAdmin.ten,
+                email: schoolAdmin.email,
+                sdt: schoolAdmin.sdt,
+                role: schoolAdmin.role,
+                schoolId: schoolAdmin.schoolId
+            }
+        });
+    } catch (error) {
+        console.error('Lỗi khi tạo tài khoản school_admin:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Lỗi server',
+            error: error.message
+        });
+    }
+};
+
 // Hàm helper để chuyển đổi tên phương thức
 function getMethodName(method) {
     const methodNames = {
