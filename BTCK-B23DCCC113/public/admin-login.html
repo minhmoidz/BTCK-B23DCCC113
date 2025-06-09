@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Trường - Đăng nhập</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+        }
+        .hidden {
+            display: none;
+        }
+        .profile-card {
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .filter-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Form đăng nhập -->
+        <div id="loginSection">
+            <h2 class="mb-4">Đăng nhập Admin Trường</h2>
+            <div class="card">
+                <div class="card-body">
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label for="sdt" class="form-label">Số điện thoại</label>
+                            <input type="text" class="form-control" id="sdt" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Mật khẩu</label>
+                            <input type="password" class="form-control" id="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Đăng nhập</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phần hiển thị sau khi đăng nhập -->
+        <div id="dashboardSection" class="hidden">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Quản lý hồ sơ sinh viên</h2>
+                <button class="btn btn-outline-danger" onclick="logout()">Đăng xuất</button>
+            </div>
+
+            <!-- Thông tin trường -->
+            <div class="alert alert-info" id="schoolInfo"></div>
+
+            <!-- Bộ lọc -->
+            <div class="filter-section">
+                <div class="row">
+                    <div class="col-md-3">
+                        <select class="form-select" id="trangThaiFilter">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="dang_duyet">Đang duyệt</option>
+                            <option value="da_duyet">Đã duyệt</option>
+                            <option value="tu_choi">Từ chối</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="phuongThucFilter">
+                            <option value="">Tất cả phương thức</option>
+                            <option value="thpt">Xét điểm thi THPT</option>
+                            <option value="hsa">Xét học bạ</option>
+                            <option value="tsa">Xét tài năng</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="nganhFilter">
+                            <option value="">Tất cả ngành</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-primary w-100" onclick="loadProfiles()">Lọc</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Danh sách hồ sơ -->
+            <div id="profilesList"></div>
+
+            <!-- Phân trang -->
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center" id="pagination"></ul>
+            </nav>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let currentPage = 1;
+        const limit = 10;
+
+        // Xử lý đăng nhập
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const sdt = document.getElementById('sdt').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ sdt, password })
+                });
+
+                // Kiểm tra response có phải là JSON không
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Server không trả về JSON hợp lệ');
+                }
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    if (!data.user || !data.token) {
+                        throw new Error('Dữ liệu đăng nhập không hợp lệ');
+                    }
+                    currentUser = data.user;
+                    localStorage.setItem('token', data.token);
+                    showDashboard();
+                } else {
+                    alert(data.message || 'Đăng nhập thất bại');
+                }
+            } catch (error) {
+                console.error('Lỗi đăng nhập:', error);
+                alert('Lỗi đăng nhập: ' + error.message);
+            }
+        });
+
+        // Hiển thị dashboard
+        function showDashboard() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('dashboardSection').classList.remove('hidden');
+            
+            // Hiển thị thông tin trường
+            const schoolInfo = document.getElementById('schoolInfo');
+            schoolInfo.textContent = `Trường: ${currentUser.school.name} (${currentUser.school.id})`;
+
+            // Load danh sách hồ sơ
+            loadProfiles();
+        }
+
+        // Load danh sách hồ sơ
+        async function loadProfiles() {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            const trangThai = document.getElementById('trangThaiFilter').value;
+            const phuongThuc = document.getElementById('phuongThucFilter').value;
+            const nganh = document.getElementById('nganhFilter').value;
+
+            try {
+                const response = await fetch(
+                    `/api/admin/schools/${currentUser.schoolId}/profiles?` + 
+                    `page=${currentPage}&limit=${limit}` +
+                    (trangThai ? `&trangThai=${trangThai}` : '') +
+                    (phuongThuc ? `&phuongThuc=${phuongThuc}` : '') +
+                    (nganh ? `&nganh=${nganh}` : ''),
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    }
+                );
+
+                const data = await response.json();
+                if (response.ok) {
+                    displayProfiles(data.profiles);
+                    displayPagination(data.pagination);
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                alert('Lỗi tải danh sách hồ sơ: ' + error.message);
+            }
+        }
+
+        // Hiển thị danh sách hồ sơ
+        function displayProfiles(profiles) {
+            const container = document.getElementById('profilesList');
+            container.innerHTML = '';
+
+            profiles.forEach(profile => {
+                const card = document.createElement('div');
+                card.className = 'profile-card';
+                card.innerHTML = `
+                    <div class="d-flex justify-content-between">
+                        <h5>${profile.hoTen}</h5>
+                        <span class="badge ${getStatusBadgeClass(profile.trangThai)}">
+                            ${getStatusText(profile.trangThai)}
+                        </span>
+                    </div>
+                    <p class="mb-1">Mã hồ sơ: ${profile.maHoSo}</p>
+                    <p class="mb-1">Ngành: ${profile.tenNganh}</p>
+                    <p class="mb-1">Phương thức: ${getMethodText(profile.phuongThuc)}</p>
+                    <p class="mb-1">Ngày nộp: ${new Date(profile.createdAt).toLocaleDateString()}</p>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Hiển thị phân trang
+        function displayPagination(pagination) {
+            const container = document.getElementById('pagination');
+            container.innerHTML = '';
+
+            // Nút Previous
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${pagination.currentPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${pagination.currentPage - 1})">Previous</a>`;
+            container.appendChild(prevLi);
+
+            // Các số trang
+            for (let i = 1; i <= pagination.totalPages; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === pagination.currentPage ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i})">${i}</a>`;
+                container.appendChild(li);
+            }
+
+            // Nút Next
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${pagination.currentPage === pagination.totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${pagination.currentPage + 1})">Next</a>`;
+            container.appendChild(nextLi);
+        }
+
+        // Chuyển trang
+        function changePage(page) {
+            currentPage = page;
+            loadProfiles();
+        }
+
+        // Đăng xuất
+        function logout() {
+            localStorage.removeItem('token');
+            currentUser = null;
+            document.getElementById('dashboardSection').classList.add('hidden');
+            document.getElementById('loginSection').classList.remove('hidden');
+        }
+
+        // Helper functions
+        function getStatusBadgeClass(status) {
+            const classes = {
+                'dang_duyet': 'bg-warning',
+                'da_duyet': 'bg-success',
+                'tu_choi': 'bg-danger'
+            };
+            return classes[status] || 'bg-secondary';
+        }
+
+        function getStatusText(status) {
+            const texts = {
+                'dang_duyet': 'Đang duyệt',
+                'da_duyet': 'Đã duyệt',
+                'tu_choi': 'Từ chối'
+            };
+            return texts[status] || status;
+        }
+
+        function getMethodText(method) {
+            const texts = {
+                'thpt': 'Xét điểm thi THPT',
+                'hsa': 'Xét học bạ',
+                'tsa': 'Xét tài năng'
+            };
+            return texts[method] || method;
+        }
+
+        // Kiểm tra đăng nhập khi tải trang
+        window.onload = function() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                // Nếu có token, thử lấy thông tin user
+                fetch('/api/auth/me', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.user) {
+                        currentUser = data.user;
+                        showDashboard();
+                    }
+                })
+                .catch(() => {
+                    localStorage.removeItem('token');
+                });
+            }
+        };
+    </script>
+</body>
+</html> 

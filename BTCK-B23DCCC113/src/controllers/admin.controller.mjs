@@ -55,10 +55,13 @@ export const addSchool = async (req, res) => {
                     return res.status(400).json({ message: 'Email hoặc số điện thoại admin đã được đăng ký.' });
                 }
 
+                // Mã hóa mật khẩu
+                const hashedPassword = await bcrypt.hash(adminPassword, 10);
+
                 const adminUser = new User({
                     ten: adminName,
                     email: adminEmail,
-                    password: adminPassword, // Lưu ý: Trong thực tế cần mã hóa password
+                    password: hashedPassword, // Sử dụng mật khẩu đã mã hóa
                     sdt: adminPhone,
                     role: 'schoolAdmin',
                     schoolId: id
@@ -1152,5 +1155,157 @@ export const addUser = async (req, res) => {
     } catch (error) {
         console.error('❌ Lỗi khi tạo người dùng:', error);
         res.status(500).json({ message: 'Lỗi server khi tạo người dùng', error: error.message });
+    }
+};
+
+// --- QUẢN LÝ TÀI KHOẢN ADMIN TRƯỜNG ---
+export const createSchoolAdmin = async (req, res) => {
+    try {
+        const { schoolId, email, password, name, phone } = req.body;
+
+        // Kiểm tra các trường bắt buộc
+        if (!schoolId || !email || !password || !name || !phone) {
+            return res.status(400).json({ message: 'Thiếu thông tin bắt buộc' });
+        }
+
+        // Kiểm tra trường có tồn tại
+        const school = await School.findOne({ id: schoolId });
+        if (!school) {
+            return res.status(404).json({ message: 'Không tìm thấy trường học' });
+        }
+
+        // Validate email và số điện thoại
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ message: 'Email không hợp lệ' });
+        }
+
+        const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/;
+        if (!phoneRegex.test(phone)) {
+            return res.status(400).json({ message: 'Số điện thoại không hợp lệ' });
+        }
+
+        // Kiểm tra trùng lặp
+        const existingUser = await User.findOne({ 
+            $or: [{ email }, { sdt: phone }] 
+        });
+        if (existingUser) {
+            return res.status(400).json({ message: 'Email hoặc số điện thoại đã được sử dụng' });
+        }
+
+        // Mã hóa mật khẩu
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Tạo tài khoản admin mới
+        const newAdmin = new User({
+            ten: name,
+            email: email,
+            sdt: phone,
+            password: hashedPassword,
+            role: 'schoolAdmin',
+            schoolId: schoolId
+        });
+
+        await newAdmin.save();
+
+        res.status(201).json({
+            message: 'Tạo tài khoản admin trường thành công',
+            admin: {
+                id: newAdmin._id,
+                name: newAdmin.ten,
+                email: newAdmin.email,
+                phone: newAdmin.sdt,
+                schoolId: newAdmin.schoolId,
+                role: newAdmin.role
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export const getSchoolAdmins = async (req, res) => {
+    try {
+        const { schoolId } = req.query;
+        
+        let query = { role: 'schoolAdmin' };
+        if (schoolId) {
+            query.schoolId = schoolId;
+        }
+
+        const admins = await User.find(query).select('-password');
+        
+        // Lấy thông tin trường cho mỗi admin
+        const adminsWithSchoolInfo = await Promise.all(admins.map(async (admin) => {
+            const school = await School.findOne({ id: admin.schoolId });
+            return {
+                id: admin._id,
+                name: admin.ten,
+                email: admin.email,
+                phone: admin.sdt,
+                schoolId: admin.schoolId,
+                schoolName: school ? school.name : 'Không xác định',
+                role: admin.role,
+                createdAt: admin.createdAt
+            };
+        }));
+
+        res.json(adminsWithSchoolInfo);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Lấy hồ sơ theo trường
+export const getSchoolProfiles = async (req, res) => {
+    try {
+        const { schoolId } = req.params;
+        const { trangThai, phuongThuc, nganh, page = 1, limit = 20 } = req.query;
+        
+        // Kiểm tra quyền truy cập
+        if (req.user.role !== 'schoolAdmin' || req.user.schoolId !== schoolId) {
+            return res.status(403).json({ message: 'Không có quyền truy cập hồ sơ của trường này' });
+        }
+
+        let query = { truong: schoolId };
+        
+        if (trangThai) query.trangThai = trangThai;
+        if (phuongThuc) query.phuongThuc = phuongThuc;
+        if (nganh) query.maNganh = nganh;
+        
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+        
+        const [profiles, total] = await Promise.all([
+            Profile.find(query)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(parseInt(limit)),
+            Profile.countDocuments(query)
+        ]);
+
+        // Lấy thông tin ngành học
+        const majors = await Major.find({ schoolId });
+        const majorMap = {};
+        majors.forEach(major => {
+            majorMap[major.id] = major.name;
+        });
+
+        // Thêm tên ngành vào kết quả
+        const profilesWithMajorName = profiles.map(profile => ({
+            ...profile.toObject(),
+            tenNganh: majorMap[profile.maNganh] || profile.maNganh
+        }));
+        
+        res.json({
+            profiles: profilesWithMajorName,
+            pagination: {
+                currentPage: parseInt(page),
+                totalPages: Math.ceil(total / parseInt(limit)),
+                totalItems: total,
+                itemsPerPage: parseInt(limit)
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 };
