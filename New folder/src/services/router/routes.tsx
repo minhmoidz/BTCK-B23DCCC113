@@ -9,6 +9,27 @@ import TheoDoiHoSoTraCuu from '../../pages/tracuu/TraCuu';
 import SimpleAuthPage from '../../component/login';
 import NotificationPage from '../../pages/thongbao/NotificationPage';
 import QuyCheThi from '../../pages/huongdan/QuyCheThi';
+import DangKy from '../../pages/huongdan/DangKy';
+import LePhi from '../../pages/huongdan/LePhi';
+import TraCuuHuongDan from '../../pages/huongdan/TraCuu';
+import FAQ from '../../pages/huongdan/FAQ';
+import LienHe from '../../pages/huongdan/LienHe';
+import HSA from '../../pages/kythi/HSA';
+import TSA from '../../pages/kythi/TSA';
+import LichSuKyThi from '../../pages/kythi/LichSu';
+import DeThiMau from '../../pages/kythi/DeThiMau';
+import DGNL from '../../pages/lichthi/DGNL';
+import DGTD from '../../pages/lichthi/DGTD';
+import THPTQGLichThi from '../../pages/lichthi/THPTQG';
+import ThoiHan from '../../pages/lichthi/ThoiHan';
+import DiemThi from '../../pages/tracuu/DiemThi';
+import HoSo from '../../pages/tracuu/HoSo';
+import LichSuTraCuu from '../../pages/tracuu/LichSu';
+import ThongBao from '../../pages/tracuu/ThongBao';
+import THPTQGDiem from '../../pages/tracuu/THPTQG';
+import KinhNghiem from '../../pages/dien-dan/KinhNghiem';
+import HoiDap from '../../pages/dien-dan/HoiDap';
+import TinTuc from '../../pages/dien-dan/TinTuc';
 
 // Import các component Admin
 import ProfileManager from '../../pages/admin/ProfileManager';
@@ -46,6 +67,27 @@ const Router: React.FC<RouterProps> = ({ loggedInUser, onLogin, onLogout }) => (
       <Route path="/chat" element={<ChatPage />} />
       <Route path="/thong-bao" element={<NotificationPage />} />
       <Route path="/huong-dan/quy-che-thi" element={<QuyCheThi />} />
+      <Route path="/huong-dan/dang-ky" element={<DangKy />} />
+      <Route path="/huong-dan/le-phi" element={<LePhi />} />
+      <Route path="/huong-dan/tra-cuu" element={<TraCuuHuongDan />} />
+      <Route path="/huong-dan/faq" element={<FAQ />} />
+      <Route path="/huong-dan/lien-he" element={<LienHe />} />
+      <Route path="/ky-thi/hsa" element={<HSA />} />
+      <Route path="/ky-thi/tsa" element={<TSA />} />
+      <Route path="/ky-thi/lich-su" element={<LichSuKyThi />} />
+      <Route path="/ky-thi/de-thi-mau" element={<DeThiMau />} />
+      <Route path="/lich-thi/dgnl" element={<DGNL />} />
+      <Route path="/lich-thi/dgtd" element={<DGTD />} />
+      <Route path="/lich-thi/thptqg" element={<THPTQGLichThi />} />
+      <Route path="/lich-thi/thoi-han" element={<ThoiHan />} />
+      <Route path="/tra-cuu/diem" element={<DiemThi />} />
+      <Route path="/tra-cuu/ho-so" element={<HoSo />} />
+      <Route path="/tra-cuu/lich-su" element={<LichSuTraCuu />} />
+      <Route path="/tra-cuu/thong-bao" element={<ThongBao />} />
+      <Route path="/tra-cuu/thptqg" element={<THPTQGDiem />} />
+      <Route path="/dien-dan/kinh-nghiem" element={<KinhNghiem />} />
+      <Route path="/dien-dan/hoi-dap" element={<HoiDap />} />
+      <Route path="/dien-dan/tin-tuc" element={<TinTuc />} />
 
       {/* Trang Admin với các route con */}
       <Route path="/admin" element={<AdminLayout/>}>

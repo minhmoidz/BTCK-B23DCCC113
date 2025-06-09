@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Menu } from 'antd';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const menuItems = [
   { label: 'TRANG CHỦ', key: 'home', link: '/' },
@@ -52,7 +52,20 @@ const menuItems = [
   },
 ];
 
+const getSelectedKey = (pathname: string) => {
+  if (pathname === '/') return ['home'];
+  if (pathname.startsWith('/huong-dan')) return ['guide'];
+  if (pathname.startsWith('/ky-thi')) return ['exam'];
+  if (pathname.startsWith('/lich-thi')) return ['lichthi'];
+  if (pathname.startsWith('/tra-cuu')) return ['tracuu'];
+  if (pathname.startsWith('/dien-dan')) return ['forum'];
+  return [];
+};
+
 const Navbar: React.FC = () => {
+  const location = useLocation();
+  const selectedKeys = getSelectedKey(location.pathname);
+
   // Xử lý click submenu: chỉ alert text tượng trưng
   const handleMenuClick = (e: any) => {
     // Không cần xử lý gì đặc biệt nếu đã có link
@@ -85,12 +98,14 @@ const Navbar: React.FC = () => {
       <Menu
         mode="horizontal"
         style={{ background: 'transparent', borderBottom: 'none', flex: 1, justifyContent: 'center', fontWeight: 600, fontSize: 16 }}
-        defaultSelectedKeys={['home']}
+        selectedKeys={selectedKeys}
         items={menuItems.map(item => {
           if (item.children) {
+            // Nếu mục cha đang được chọn, set màu trắng cho label
+            const isSelected = selectedKeys.includes(item.key);
             return {
               key: item.key,
-              label: item.label,
+              label: <span style={{ color: isSelected ? '#fff' : '#222' }}>{item.label}</span>,
               children: item.children.map(sub => {
                 const labelContent = <span style={{ color: sub.link ? '#1677ff' : '#4da3ff', fontWeight: 600 }}>{sub.label}</span>;
                 if (sub.link) {
@@ -106,9 +121,11 @@ const Navbar: React.FC = () => {
               })
             };
           }
+          // Mục không có con, vẫn giữ màu trắng khi được chọn
+          const isSelected = selectedKeys.includes(item.key);
           return {
             key: item.key,
-            label: <Link to={item.link} style={{ color: '#fff' }}>{item.label}</Link>
+            label: <Link to={item.link} style={{ color: isSelected ? '#fff' : '#222' }}>{item.label}</Link>
           };
         })}
         onClick={handleMenuClick}
