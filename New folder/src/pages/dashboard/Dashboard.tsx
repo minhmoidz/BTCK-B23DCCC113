@@ -10,7 +10,7 @@ import Announcements from '../../component/user/dashboard/Announcements';
 
 // 1. Import API từ service và component mới
 import { dashboardApi } from '../../services/dashboardApi';
-import TrendingSchools from './TrendingMajors';
+import TrendingSchools, { SchoolData } from './TrendingMajors';
 
 const { Title, Paragraph, Text } = Typography;
 const { Option } = Select;
@@ -90,7 +90,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, onLogout }) => {
 
   return (
     <RootLayout username={username} onLogout={onLogout}>
-      {/* Header (không thay đổi) */}
+      {/* Header Section */}
       <div
         style={{
           backgroundColor: '#fff',
@@ -125,7 +125,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, onLogout }) => {
         </Space>
       </div>
 
-      {/* Main content (không thay đổi) */}
+      {/* Main content */}
       <Row gutter={[32, 32]}>
         <Col xs={24} lg={16}>
           <Title level={4} style={{ marginBottom: 24, display: 'flex', alignItems: 'center', color: '#1890ff' }}>
@@ -140,7 +140,6 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, onLogout }) => {
         </Col>
       </Row>
 
-      {/* 4. Cập nhật phần hiển thị */}
       <div style={{ marginTop: 56 }}>
         <Divider>
           <Title level={3} style={{ margin: 0, paddingBottom: 6, color: '#003a8c', display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -151,11 +150,10 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, onLogout }) => {
         <Paragraph style={{ textAlign: 'center', color: '#555', marginBottom: 32, maxWidth: 600, margin: '0 auto 32px' }}>
           Khám phá các trường đại học đang thu hút nhiều sự quan tâm và đăng ký nhất trong kỳ tuyển sinh năm nay.
         </Paragraph>
-        {/* Sử dụng component TrendingSchools với dữ liệu thật */}
         <TrendingSchools schools={trendingSchools} loading={loadingSchools} />
       </div>
 
-      {/* Chatbot và Footer (không thay đổi) */}
+      {/* Chatbot Button */}
       <Tooltip title="Trò chuyện với trợ lý ảo">
         <Button
           type="primary"
@@ -176,6 +174,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, onLogout }) => {
         />
       </Tooltip>
 
+      {/* Footer */}
       <footer
         style={{
           textAlign: 'center',

@@ -46,6 +46,8 @@ import SchoolAdminProfileManager from '../../pages/adminSchool/SchoolAdminProfil
 import ProtectedRoute from '../../component/login/ProtectedRoute';
 import NotificationDetail from '../../pages/thongbao/NotificationDetail';
 import XetTuyenManager from '../../pages/admin/XetTuyenManager';
+import TrendingSchools from '../../pages/dashboard/TrendingMajors';
+import AdmissionInfo from '../../pages/dashboard/AdmissionInfo';
 
 interface RouterProps {
   loggedInUser: string | null;
@@ -90,10 +92,11 @@ const Router: React.FC<RouterProps> = ({ loggedInUser, onLogin, onLogout }) => (
       <Route path="/tra-cuu/ho-so" element={<HoSo />} />
       <Route path="/tra-cuu/lich-su" element={<LichSuTraCuu />} />
       <Route path="/tra-cuu/thong-bao" element={<ThongBao />} />
-      <Route path="/tra-cuu/thptqg" element={<THPTQGDiem />} />
+      <Route path="/tra-cuu/thptqg" element={<THPTQGDiem />} /> 
       <Route path="/dien-dan/kinh-nghiem" element={<KinhNghiem />} />
       <Route path="/dien-dan/hoi-dap" element={<HoiDap />} />
       <Route path="/dien-dan/tin-tuc" element={<TinTuc />} />
+      <Route path="/schools/:id" element={<AdmissionInfo />} />
 
       {/* Trang Admin với các route con */}
       <Route path="/admin" element={

@@ -76,7 +76,7 @@ const TrendingSchools: React.FC<TrendingSchoolsProps> = ({ schools, loading }) =
                   onClick={() => handleViewDetails(school.maTruong)}
                   style={{ fontWeight: 'bold' }}
                 >
-                  Tìm hiểu thêm <ArrowRightOutlined />
+                  Xem thông tin tuyển sinh <ArrowRightOutlined />
                 </Button>,
               ]}
             >
