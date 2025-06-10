@@ -220,7 +220,7 @@ const AdmissionCalculator: React.FC = () => {
     const payload: CalculationPayload = {
       majorId: major._id,
       admissionType: admissionTypeForCalc,
-      scores: {},
+      scores: [],
     };
 
     if (admissionTypeForCalc === 'thpt') {

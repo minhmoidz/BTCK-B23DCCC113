@@ -61,13 +61,22 @@ const QuyCheThi: React.FC = () => {
           <div style={{ marginTop: 48 }}>
             <Title level={3}>Nội dung quy chế chi tiết</Title>
             <Paragraph>
-              Đây là nội dung chi tiết về quy chế thi. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor. Cras elementum ultrices diam. Maecenas ligula massa, varius a, semper congue, euismod non, mi. Proin porttitor, orci nec nonummy molestie, enim est eleifend mi, non fermentum diam nisl sit amet erat.
+              <b>1. Đối tượng dự thi:</b> Thí sinh là học sinh lớp 12 hoặc đã tốt nghiệp THPT, có đủ sức khỏe, không trong thời gian bị kỷ luật hoặc truy cứu trách nhiệm hình sự. Mỗi thí sinh chỉ được đăng ký 1 tài khoản duy nhất trên hệ thống.
             </Paragraph>
             <Paragraph>
-              Duis semper. Duis arcu massa, scelerisque vitae, consequat in, pretium a, enim. Pellentesque congue. Ut in risus volutpat libero pharetra tempor. Cras vestibulum bibendum augue. Praesent egestas leo in pede. Praesent blandit odio eu enim. Pellentesque sed dui ut augue blandit sodales. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Aliquam nibh.
+              <b>2. Quy trình thi:</b> Thí sinh đăng ký dự thi, nhận phiếu báo dự thi, có mặt tại địa điểm thi đúng giờ, mang theo đầy đủ giấy tờ tùy thân (CMND/CCCD, phiếu báo dự thi). Thí sinh phải tuân thủ hướng dẫn của cán bộ coi thi trong suốt quá trình thi.
             </Paragraph>
             <Paragraph>
-              Mauris ac mauris sed pede pellentesque fermentum. Maecenas adipiscing ante non diam. Sorbi in harmonig, neque voluptatem, a sequi, a sequi, a sequi, a sequi, a sequi.
+              <b>3. Quy định phòng thi:</b> Không được mang vào phòng thi các vật dụng bị cấm như điện thoại, thiết bị thu phát sóng, tài liệu, giấy tờ không liên quan. Thí sinh vi phạm sẽ bị lập biên bản và xử lý theo quy định.
+            </Paragraph>
+            <Paragraph>
+              <b>4. Xử lý vi phạm:</b> Các hành vi gian lận, trao đổi bài, sử dụng tài liệu, thi hộ, gây rối trật tự sẽ bị đình chỉ thi và hủy kết quả. Trường hợp nghiêm trọng có thể bị truy cứu trách nhiệm hình sự.
+            </Paragraph>
+            <Paragraph>
+              <b>5. Quyền lợi thí sinh:</b> Được đảm bảo quyền lợi về bảo mật thông tin, quyền khiếu nại/phản ánh về kết quả thi, được hỗ trợ giải đáp thắc mắc trong quá trình dự thi và xét tuyển.
+            </Paragraph>
+            <Paragraph>
+              <b>Lưu ý:</b> Thí sinh nên đọc kỹ quy chế thi, chuẩn bị đầy đủ giấy tờ và tuân thủ mọi quy định để tránh các sự cố không mong muốn.
             </Paragraph>
           </div>
         </div>

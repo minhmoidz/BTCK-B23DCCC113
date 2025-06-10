@@ -9,6 +9,11 @@ const kinhNghiem = [
   { title: 'Lập kế hoạch ôn tập hợp lý', desc: 'Chia nhỏ kiến thức, đặt mục tiêu từng tuần, từng tháng.' },
   { title: 'Làm đề thi thử', desc: 'Luyện tập với đề thi mẫu, đề các năm trước để làm quen áp lực thời gian.' },
   { title: 'Giữ sức khỏe và tinh thần', desc: 'Ăn uống, nghỉ ngơi hợp lý, giữ tinh thần lạc quan.' },
+  { title: 'Ôn tập theo nhóm', desc: 'Thảo luận, giải đáp thắc mắc cùng bạn bè để hiểu sâu kiến thức.' },
+  { title: 'Tổng hợp lỗi sai', desc: 'Ghi chú lại các lỗi thường gặp để tránh lặp lại khi thi thật.' },
+  { title: 'Chia thời gian hợp lý khi làm bài', desc: 'Ưu tiên câu dễ trước, không sa đà vào câu khó, kiểm soát thời gian.' },
+  { title: 'Giữ liên lạc với thầy cô', desc: 'Chủ động hỏi thầy cô khi gặp khó khăn, xin tài liệu ôn tập phù hợp.' },
+  { title: 'Tập luyện kỹ năng làm bài trắc nghiệm', desc: 'Luyện phản xạ nhanh, đọc kỹ đề, tránh chọn đáp án vội vàng.' },
 ];
 
 const KinhNghiem: React.FC = () => (
