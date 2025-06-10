@@ -2,15 +2,12 @@ export interface Notification {
   _id: string;
   title: string;
   content: string;
-  type: 'normal' | 'urgent' | 'announcement';
-  status: 'draft' | 'scheduled' | 'published' | 'expired';
+  description: string;
+  image?: string;
+  isImportant: boolean;
   isPinned: boolean;
-  scheduledFor?: Date;
-  expiresAt?: Date;
-  createdAt: Date;
-  updatedAt: Date;
-  visibility: 'all_users' | 'roles';
-  targetRoles?: Array<'student' | 'parent' | 'school'>;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface PaginationParams {
@@ -22,11 +19,11 @@ export interface PaginatedResponse<T> {
   docs: T[];
   totalDocs: number;
   limit: number;
-  page: number;
   totalPages: number;
-  hasNextPage: boolean;
-  nextPage: number | null;
-  hasPrevPage: boolean;
-  prevPage: number | null;
+  page: number;
   pagingCounter: number;
+  hasPrevPage: boolean;
+  hasNextPage: boolean;
+  prevPage: number | null;
+  nextPage: number | null;
 } 

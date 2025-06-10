@@ -1,14 +1,31 @@
 import Notification from '../models/Notification.mjs';
+import fs from 'fs';
+import path from 'path';
 
 // Tạo thông báo mới
 export const createNotification = async (req, res) => {
   try {
     const { title, content, description, isImportant, isPinned } = req.body;
+    let imagePath = null;
+
+    // Handle image upload if exists
+    if (req.file) {
+      const uploadDir = 'uploads/notifications';
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+
+      // Move file from tmp to permanent location
+      const newPath = path.join(uploadDir, req.file.filename);
+      fs.renameSync(req.file.path, newPath);
+      imagePath = `${uploadDir}/${req.file.filename}`;
+    }
     
     const notification = new Notification({
       title,
       content,
       description,
+      image: imagePath,
       isImportant: isImportant === 'true',
       isPinned: isPinned === 'true'
     });
@@ -21,6 +38,10 @@ export const createNotification = async (req, res) => {
       data: notification
     });
   } catch (error) {
+    // Clean up uploaded file if there was an error
+    if (req.file && req.file.path) {
+      fs.unlinkSync(req.file.path);
+    }
     res.status(400).json({
       success: false,
       message: 'Không thể tạo thông báo',
@@ -145,21 +166,35 @@ export const toggleImportant = async (req, res) => {
 export const updateNotification = async (req, res) => {
   try {
     const { title, content, description, isImportant, isPinned } = req.body;
-    
+    let updateData = { title, content, description, isImportant: isImportant === 'true', isPinned: isPinned === 'true' };
+
+    // Handle image upload if exists
+    if (req.file) {
+      const uploadDir = 'uploads/notifications';
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+
+      // Move file from tmp to permanent location
+      const newPath = path.join(uploadDir, req.file.filename);
+      fs.renameSync(req.file.path, newPath);
+      updateData.image = `${uploadDir}/${req.file.filename}`;
+
+      // Delete old image if exists
+      const oldNotification = await Notification.findById(req.params.id);
+      if (oldNotification && oldNotification.image) {
+        try {
+          fs.unlinkSync(oldNotification.image);
+        } catch (err) {
+          console.error('Error deleting old image:', err);
+        }
+      }
+    }
+
     const notification = await Notification.findByIdAndUpdate(
       req.params.id,
-      {
-        title,
-        content,
-        description,
-        isImportant: isImportant === 'true',
-        isPinned: isPinned === 'true',
-        updatedAt: new Date()
-      },
-      {
-        new: true,
-        runValidators: true
-      }
+      updateData,
+      { new: true }
     );
 
     if (!notification) {
@@ -169,12 +204,16 @@ export const updateNotification = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    res.json({
       success: true,
-      message: 'Thông báo đã được cập nhật thành công',
+      message: 'Cập nhật thông báo thành công',
       data: notification
     });
   } catch (error) {
+    // Clean up uploaded file if there was an error
+    if (req.file && req.file.path) {
+      fs.unlinkSync(req.file.path);
+    }
     res.status(400).json({
       success: false,
       message: 'Không thể cập nhật thông báo',
@@ -186,8 +225,8 @@ export const updateNotification = async (req, res) => {
 // Xóa thông báo
 export const deleteNotification = async (req, res) => {
   try {
-    const notification = await Notification.findByIdAndDelete(req.params.id);
-
+    const notification = await Notification.findById(req.params.id);
+    
     if (!notification) {
       return res.status(404).json({
         success: false,
@@ -195,9 +234,20 @@ export const deleteNotification = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    // Delete associated image if exists
+    if (notification.image) {
+      try {
+        fs.unlinkSync(notification.image);
+      } catch (err) {
+        console.error('Error deleting image:', err);
+      }
+    }
+
+    await notification.deleteOne();
+
+    res.json({
       success: true,
-      message: 'Đã xóa thông báo thành công'
+      message: 'Xóa thông báo thành công'
     });
   } catch (error) {
     res.status(400).json({

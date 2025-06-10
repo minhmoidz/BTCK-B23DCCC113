@@ -7,7 +7,7 @@ import XetTuyen from '../../pages/xettuyen/XetTuyen';
 import ThanhToan from '../../pages/thanhtoan/ThanhToan';
 import TheoDoiHoSoTraCuu from '../../pages/tracuu/TraCuu';
 import SimpleAuthPage from '../../component/login';
-import NotificationPage from '../../pages/thongbao/NotificationPage';
+import AllNotification from '../../pages/thongbao/AllNotification';
 import QuyCheThi from '../../pages/huongdan/QuyCheThi';
 import DangKy from '../../pages/huongdan/DangKy';
 import LePhi from '../../pages/huongdan/LePhi';
@@ -30,6 +30,7 @@ import THPTQGDiem from '../../pages/tracuu/THPTQG';
 import KinhNghiem from '../../pages/dien-dan/KinhNghiem';
 import HoiDap from '../../pages/dien-dan/HoiDap';
 import TinTuc from '../../pages/dien-dan/TinTuc';
+import NotificationDetail from '../../pages/thongbao/NotificationDetail';
 
 // Import các component Admin
 import ProfileManager from '../../pages/admin/ProfileManager';
@@ -65,7 +66,8 @@ const Router: React.FC<RouterProps> = ({ loggedInUser, onLogin, onLogout }) => (
       />
       <Route path="/major/:slug" element={<MajorDetail />} />
       <Route path="/chat" element={<ChatPage />} />
-      <Route path="/thong-bao" element={<NotificationPage />} />
+      <Route path="/thong-bao" element={<AllNotification />} />
+      <Route path="/thong-bao/:id" element={<NotificationDetail />} />
       <Route path="/huong-dan/quy-che-thi" element={<QuyCheThi />} />
       <Route path="/huong-dan/dang-ky" element={<DangKy />} />
       <Route path="/huong-dan/le-phi" element={<LePhi />} />

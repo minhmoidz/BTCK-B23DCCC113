@@ -16,7 +16,9 @@ import {
   Row,
   Col,
   Statistic,
-  Spin
+  Spin,
+  Upload,
+  Image
 } from 'antd';
 import {
   EditOutlined,
@@ -26,7 +28,8 @@ import {
   PushpinFilled,
   StarOutlined,
   StarFilled,
-  NotificationOutlined
+  NotificationOutlined,
+  UploadOutlined
 } from '@ant-design/icons';
 import axios from 'axios';
 import { format } from 'date-fns';
@@ -56,6 +59,7 @@ interface Notification {
   isImportant: boolean;
   isPinned: boolean;
   createdAt: string;
+  image?: string;
 }
 
 const StyledCard = styled(Card)`
@@ -151,6 +155,8 @@ const NotificationManagerment: React.FC = () => {
     pinned: 0,
     important: 0
   });
+  const [imageUrl, setImageUrl] = useState<string>();
+  const [imageLoading, setImageLoading] = useState<boolean>(false);
 
   // Get token from localStorage
   const getAuthHeader = () => {
@@ -198,30 +204,48 @@ const NotificationManagerment: React.FC = () => {
   // Handle form submission
   const handleSubmit = async (values: any) => {
     try {
-      const formData = {
-        ...values,
-        isImportant: Boolean(values.isImportant),
-        isPinned: Boolean(values.isPinned)
-      };
+      setImageLoading(true);
+      const formData = new FormData();
+      
+      // Append text fields
+      formData.append('title', values.title);
+      formData.append('content', values.content);
+      formData.append('description', values.description);
+      formData.append('isImportant', String(values.isImportant));
+      formData.append('isPinned', String(values.isPinned));
+
+      // Append image if exists
+      if (values.image && values.image[0]?.originFileObj) {
+        formData.append('image', values.image[0].originFileObj);
+      }
 
       if (editingId) {
         await api.put(`/api/notifications/${editingId}`, formData, {
-          headers: getAuthHeader()
+          headers: {
+            ...getAuthHeader(),
+            'Content-Type': 'multipart/form-data'
+          }
         });
         message.success('Cập nhật thông báo thành công');
       } else {
         await api.post('/api/notifications', formData, {
-          headers: getAuthHeader()
+          headers: {
+            ...getAuthHeader(),
+            'Content-Type': 'multipart/form-data'
+          }
         });
         message.success('Tạo thông báo thành công');
       }
 
       setModalVisible(false);
       form.resetFields();
+      setImageUrl(undefined);
       fetchNotifications();
     } catch (error) {
       console.error('Error submitting form:', error);
       message.error('Có lỗi xảy ra khi lưu thông báo');
+    } finally {
+      setImageLoading(false);
     }
   };
 
@@ -364,6 +388,21 @@ const NotificationManagerment: React.FC = () => {
             render: (date: string) => format(new Date(date), 'dd/MM/yyyy HH:mm'),
           },
           {
+            title: 'Hình ảnh',
+            dataIndex: 'image',
+            key: 'image',
+            width: '15%',
+            render: (image: string) => (
+              image ? (
+                <Image
+                  src={`http://localhost:3000/${image}`}
+                  alt="Notification"
+                  style={{ maxWidth: '100px', height: 'auto' }}
+                />
+              ) : null
+            ),
+          },
+          {
             title: 'Thao tác',
             key: 'actions',
             width: '20%',
@@ -443,6 +482,7 @@ const NotificationManagerment: React.FC = () => {
         onCancel={() => {
           setModalVisible(false);
           form.resetFields();
+          setImageUrl(undefined);
         }}
         footer={null}
         width={800}
@@ -513,15 +553,68 @@ const NotificationManagerment: React.FC = () => {
             </Col>
           </Row>
 
+          <Form.Item
+            name="image"
+            label="Hình ảnh"
+            valuePropName="fileList"
+            getValueFromEvent={(e) => {
+              if (Array.isArray(e)) {
+                return e;
+              }
+              return e?.fileList;
+            }}
+          >
+            <Upload
+              name="image"
+              listType="picture-card"
+              maxCount={1}
+              beforeUpload={(file) => {
+                const isImage = file.type.startsWith('image/');
+                if (!isImage) {
+                  message.error('Bạn chỉ có thể tải lên file hình ảnh!');
+                }
+                const isLt5M = file.size / 1024 / 1024 < 5;
+                if (!isLt5M) {
+                  message.error('Hình ảnh phải nhỏ hơn 5MB!');
+                }
+                return false;
+              }}
+              onChange={({ fileList }) => {
+                if (fileList.length > 0) {
+                  const file = fileList[0];
+                  if (file.url) {
+                    setImageUrl(file.url);
+                  } else if (file.originFileObj) {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      setImageUrl(reader.result as string);
+                    };
+                    reader.readAsDataURL(file.originFileObj);
+                  }
+                } else {
+                  setImageUrl(undefined);
+                }
+              }}
+            >
+              {imageUrl ? null : (
+                <div>
+                  <PlusOutlined />
+                  <div style={{ marginTop: 8 }}>Tải ảnh</div>
+                </div>
+              )}
+            </Upload>
+          </Form.Item>
+
           <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
             <Space>
               <Button onClick={() => {
                 setModalVisible(false);
                 form.resetFields();
+                setImageUrl(undefined);
               }}>
                 Hủy
               </Button>
-              <Button type="primary" htmlType="submit">
+              <Button type="primary" htmlType="submit" loading={imageLoading}>
                 {editingId ? 'Cập nhật' : 'Tạo mới'}
               </Button>
             </Space>
