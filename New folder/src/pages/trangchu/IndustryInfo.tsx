@@ -7,7 +7,11 @@ const industries = [
   {
     name: 'Công nghệ thông tin',
     desc: 'Đào tạo kỹ sư phần mềm, hệ thống thông tin, AI, IoT, an ninh mạng... Cơ hội nghề nghiệp rộng mở trong lĩnh vực công nghệ, lập trình, dữ liệu.',
+<<<<<<< HEAD
     schools: ['ĐH Bách Khoa Hà Nội', 'ĐH Công nghệ - ĐHQGHN', 'Học viện Công nghệ Bưu chính Viễn thông']
+=======
+    schools: ['ĐH Bách Khoa Hà Nội', 'ĐH Công nghệ - ĐHQGHN', 'HV Công nghệ Bưu chính Viễn thông']
+>>>>>>> temp-remote/main
   },
   {
     name: 'Kinh tế',
@@ -32,7 +36,11 @@ const industries = [
   {
     name: 'Khoa học xã hội',
     desc: 'Tâm lý học, xã hội học, báo chí, truyền thông... Cơ hội làm việc tại các tổ chức xã hội, truyền thông, báo chí.',
+<<<<<<< HEAD
     schools: ['ĐH Khoa học Xã hội & Nhân văn - ĐHQGHN', 'Học viện Báo chí & Tuyên truyền', 'ĐH Văn hóa Hà Nội']
+=======
+    schools: ['ĐH KHXH & Nhân văn - ĐHQGHN', 'Học viện Báo chí & Tuyên truyền', 'ĐH Văn hóa Hà Nội']
+>>>>>>> temp-remote/main
   },
 ];
 
@@ -45,10 +53,19 @@ const IndustryInfo: React.FC = () => (
           <Card hoverable style={{ borderRadius: 12, minHeight: 180 }}>
             <Title level={5} style={{ color: '#1677ff', marginBottom: 8 }}>{ind.name}</Title>
             <Paragraph style={{ marginBottom: 8 }}>{ind.desc}</Paragraph>
+<<<<<<< HEAD
             <Text strong>Trường tiêu biểu: </Text>
             {ind.schools.map((school, i) => (
               <Tag color="blue" key={i} style={{ marginBottom: 4 }}>{school}</Tag>
             ))}
+=======
+            <Text strong>Trường tiêu biểu:</Text>
+            <div style={{ marginTop: 4 }}>
+              {ind.schools.map((school, i) => (
+                <Tag color="blue" key={i} style={{ marginBottom: 4 }}>{school}</Tag>
+              ))}
+            </div>
+>>>>>>> temp-remote/main
           </Card>
         </Col>
       ))}

@@ -220,7 +220,11 @@ const AdmissionCalculator: React.FC = () => {
     const payload: CalculationPayload = {
       majorId: major._id,
       admissionType: admissionTypeForCalc,
+<<<<<<< HEAD
       scores: {},
+=======
+      scores: [],
+>>>>>>> temp-remote/main
     };
 
     if (admissionTypeForCalc === 'thpt') {

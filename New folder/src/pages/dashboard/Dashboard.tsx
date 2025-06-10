@@ -41,7 +41,10 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, onLogout }) => {
         if (data.ten) setUsername(data.ten);
         else setUsername('User');
       } catch (error) {
+<<<<<<< HEAD
         message.error('Lấy tên người dùng thất bại');
+=======
+>>>>>>> temp-remote/main
         setUsername('User');
       } finally {
         setLoadingUser(false);
@@ -102,9 +105,17 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, onLogout }) => {
         <Space size="large" wrap style={{ justifyContent: 'center' }}>
            <Select value={programType} onChange={setProgramType} style={{ width: 200 }} size="large">
              <Option value="Chính quy">Chính quy</Option>
+<<<<<<< HEAD
            </Select>
            <Select value={year} onChange={setYear} style={{ width: 160 }} size="large">
              <Option value="2025">2025</Option>
+=======
+             <Option value="Liên thông">Liên thông</Option>
+           </Select>
+           <Select value={year} onChange={setYear} style={{ width: 160 }} size="large">
+             <Option value="2024">2024</Option>
+             <Option value="2023">2023</Option>
+>>>>>>> temp-remote/main
            </Select>
            <Button type="primary" size="large" style={{ borderRadius: 10, fontWeight: 600 }}>
              Áp dụng
