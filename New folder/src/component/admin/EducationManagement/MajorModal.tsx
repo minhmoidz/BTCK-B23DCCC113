@@ -12,11 +12,6 @@ interface Props {
   editingMajor: Major | null;
   schools: School[];
   selectedSchoolId: string;
-<<<<<<< HEAD
-}
-
-const MajorModal: React.FC<Props> = ({ visible, onCancel, onOk, form, editingMajor, schools, selectedSchoolId }) => (
-=======
   loading?: boolean;
 }
 
@@ -30,7 +25,6 @@ const MajorModal: React.FC<Props> = ({
   selectedSchoolId,
   loading = false
 }) => (
->>>>>>> temp-remote/main
   <Modal
     title={editingMajor ? 'Chỉnh sửa ngành' : 'Thêm ngành'}
     open={visible}
@@ -38,11 +32,6 @@ const MajorModal: React.FC<Props> = ({
     onOk={() => form.submit()}
     okText={editingMajor ? 'Cập nhật' : 'Thêm'}
     cancelText="Hủy"
-<<<<<<< HEAD
-    destroyOnClose
-  >
-    <Form form={form} layout="vertical" onFinish={onOk}>
-=======
     confirmLoading={loading}
     destroyOnClose
   >
@@ -68,27 +57,10 @@ const MajorModal: React.FC<Props> = ({
         />
       </Form.Item>
 
->>>>>>> temp-remote/main
       <Form.Item
         name="schoolId"
         label="Trường"
         rules={[{ required: true, message: 'Vui lòng chọn trường' }]}
-<<<<<<< HEAD
-        initialValue={selectedSchoolId}
-      >
-        <Select disabled>
-          {schools.map((s) => (
-            <Option key={s.id} value={s.id}>{s.name}</Option>
-          ))}
-        </Select>
-      </Form.Item>
-      <Form.Item
-        name="name"
-        label="Tên ngành"
-        rules={[{ required: true, message: 'Vui lòng nhập tên ngành' }]}
-      >
-        <Input placeholder="Nhập tên ngành" />
-=======
       >
         <Select disabled placeholder="Chọn trường">
           {schools.map((school) => (
@@ -108,7 +80,6 @@ const MajorModal: React.FC<Props> = ({
         ]}
       >
         <Input placeholder="Ví dụ: Công nghệ thông tin" />
->>>>>>> temp-remote/main
       </Form.Item>
     </Form>
   </Modal>

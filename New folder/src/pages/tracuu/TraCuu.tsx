@@ -61,7 +61,12 @@ interface CalculationResult {
   benchmarkScore?: number;
 }
 
-const AdmissionCalculator: React.FC = () => {
+interface AdmissionCalculatorProps {
+  username: string;
+  onLogout: () => void;
+}
+
+const AdmissionCalculator: React.FC<AdmissionCalculatorProps> = ({ username, onLogout }) => {
   const [admissionMethod, setAdmissionMethod] = useState<string>('');
   const [subjectBlocks, setSubjectBlocks] = useState<SubjectBlock[]>([]);
   const [selectedSubjectBlock, setSelectedSubjectBlock] = useState<string>('');
@@ -220,11 +225,7 @@ const AdmissionCalculator: React.FC = () => {
     const payload: CalculationPayload = {
       majorId: major._id,
       admissionType: admissionTypeForCalc,
-<<<<<<< HEAD
       scores: {},
-=======
-      scores: [],
->>>>>>> temp-remote/main
     };
 
     if (admissionTypeForCalc === 'thpt') {
@@ -341,7 +342,7 @@ const AdmissionCalculator: React.FC = () => {
   };
 
   return (
-    <RootLayout username="Học sinh" onLogout={handleLogout}>
+    <RootLayout username={username} onLogout={handleLogout}>
       <Title level={2}>Công cụ Tính toán Khả năng Trúng tuyển</Title>
 
       <Card>

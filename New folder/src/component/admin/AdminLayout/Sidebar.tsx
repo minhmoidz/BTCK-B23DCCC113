@@ -1,21 +1,3 @@
-<<<<<<< HEAD
-import React from 'react';
-import { Layout, Menu, Typography, Avatar } from 'antd';
-import { DashboardOutlined, FileOutlined, UserOutlined, SettingOutlined, BankOutlined, BellOutlined } from '@ant-design/icons';
-import { useNavigate, useLocation } from 'react-router-dom';
-
-const { Sider } = Layout;
-const { Title } = Typography;
-
-const menuItems = [
-  { key: 'index', icon: <DashboardOutlined />, label: 'Tổng quan' },
-  { key: 'chi-tieu', icon: <FileOutlined />, label: 'Quản lý Xét tuyển' },
-  { key: 'xet-tuyen', icon: <BankOutlined />, label: 'Quản lý Ngành, Trường' },
-  { key: 'ho-so', icon: <UserOutlined />, label: 'Quản lý Hồ sơ' },
-  { key: 'thong-bao', icon: <BellOutlined />, label: 'Quản lý Thông báo' },
-  { key: 'chat', icon: <SettingOutlined />, label: 'Cấu hình hệ thống' },
-  { key: 'cau-hinh', icon: <SettingOutlined />, label: 'Cấu hình hệ thống' },
-=======
 import React, { useState, useMemo } from 'react';
 import { Layout, Menu, Typography, Avatar, Flex, Dropdown } from 'antd';
 import {
@@ -48,9 +30,10 @@ const getMenuItems = () => [
     icon: <AppstoreOutlined />,
     label: 'Quản lý chính',
     children: [
-      { key: 'xet-tuyen', icon: <FileDoneOutlined />, label: 'Quản lý Xét tuyển' },
+      { key: 'chi-tieu', icon: <FileDoneOutlined />, label: 'Quản lý Xét tuyển' },
       { key: 'nganh-truong', icon: <BankOutlined />, label: 'Quản lý Ngành, Trường' },
       { key: 'ho-so', icon: <TeamOutlined />, label: 'Quản lý Thí sinh' },
+      { key: 'thong-bao', icon: <BellOutlined />, label: 'Quản lý Thông báo' },
     ],
   },
   {
@@ -58,28 +41,17 @@ const getMenuItems = () => [
     icon: <SettingOutlined />,
     label: 'Hệ thống',
     children: [
-      { key: 'qly-thong-bao', icon: <BellOutlined />, label: 'Quản lý Thông báo' },
       { key: 'chat', icon: <CommentOutlined />, label: 'Phòng hỗ trợ' },
       { key: 'cau-hinh', icon: <AuditOutlined />, label: 'Quy tắc hệ thống' },
+
     ],
   },
->>>>>>> temp-remote/main
 ];
 
 const Sidebar = ({ collapsed, setCollapsed }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-<<<<<<< HEAD
-  const handleMenuClick = ({ key }) => {
-    if (key === 'index') navigate('/admin');
-    else navigate(`/admin/${key}`);
-  };
-
-  return (
-    <Sider
-      width={250}
-=======
   const menuItems = getMenuItems();
 
   // Logic để xác định menu nào đang active và submenu nào đang mở
@@ -128,7 +100,6 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
   return (
     <Sider
       width={260} // Tăng chiều rộng một chút để có không gian
->>>>>>> temp-remote/main
       collapsible
       collapsed={collapsed}
       onCollapse={setCollapsed}
@@ -140,30 +111,6 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
         left: 0,
         top: 0,
         bottom: 0,
-<<<<<<< HEAD
-      }}
-    >
-      <div
-        style={{
-          height: 64,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: collapsed ? 'center' : 'flex-start',
-          padding: collapsed ? 0 : '0 24px',
-          background: 'rgba(255, 255, 255, 0.1)',
-          margin: 16,
-          borderRadius: 8,
-        }}
-      >
-        {!collapsed ? (
-          <Title level={4} style={{ color: 'white', margin: 0 }}>
-            🎓 Quản lý Tuyển sinh
-          </Title>
-        ) : (
-          <Avatar style={{ backgroundColor: '#1890ff' }}>🎓</Avatar>
-        )}
-      </div>
-=======
         borderRight: '1px solid #2a2a2a' // Thêm đường viền mờ
       }}
     >
@@ -199,18 +146,10 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
           </div>
         )}
       </Flex>
->>>>>>> temp-remote/main
 
       <Menu
         theme="dark"
         mode="inline"
-<<<<<<< HEAD
-        selectedKeys={[location.pathname.replace('/admin/', '') || 'index']}
-        items={menuItems}
-        onClick={handleMenuClick}
-        style={{ borderRight: 0 }}
-      />
-=======
         selectedKeys={[selectedKey]}
         openKeys={openKeys}
         onOpenChange={setOpenKeys}
@@ -244,13 +183,8 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
           </Flex>
         </Dropdown>
       </div>
->>>>>>> temp-remote/main
     </Sider>
   );
 };
 
-<<<<<<< HEAD
 export default Sidebar;
-=======
-export default Sidebar;
->>>>>>> temp-remote/main

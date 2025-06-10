@@ -1,15 +1,9 @@
 import React from 'react';
-<<<<<<< HEAD
-import { Modal, Form, Input } from 'antd';
-import { School } from '../../../types/admin/EducationManagement/types';
-
-=======
 import { Modal, Form, Input, Divider, Typography } from 'antd';
 import { School } from '../../../types/admin/EducationManagement/types';
 
 const { Title } = Typography;
 
->>>>>>> temp-remote/main
 interface Props {
   visible: boolean;
   onCancel: () => void;
@@ -26,10 +20,7 @@ const SchoolModal: React.FC<Props> = ({ visible, onCancel, onOk, form, editingSc
     onOk={() => form.submit()}
     okText={editingSchool ? 'Cập nhật' : 'Thêm'}
     cancelText="Hủy"
-<<<<<<< HEAD
-=======
     width={600}
->>>>>>> temp-remote/main
     destroyOnClose
   >
     <Form form={form} layout="vertical" onFinish={onOk}>
@@ -40,8 +31,6 @@ const SchoolModal: React.FC<Props> = ({ visible, onCancel, onOk, form, editingSc
       >
         <Input placeholder="Nhập tên trường" />
       </Form.Item>
-<<<<<<< HEAD
-=======
 
       {!editingSchool && (
         <>
@@ -91,7 +80,6 @@ const SchoolModal: React.FC<Props> = ({ visible, onCancel, onOk, form, editingSc
           </Form.Item>
         </>
       )}
->>>>>>> temp-remote/main
     </Form>
   </Modal>
 );

@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 // SubjectGroupModal.tsx
->>>>>>> temp-remote/main
 import React from 'react';
 import { Modal, Form, Input, Select } from 'antd';
 import { SubjectGroup, School, Major } from '../../../types/admin/EducationManagement/types';
@@ -18,12 +15,6 @@ interface Props {
   majors: Major[];
   selectedSchoolId: string;
   selectedMajorId: string;
-<<<<<<< HEAD
-}
-
-const SubjectGroupModal: React.FC<Props> = ({
-  visible, onCancel, onOk, form, editingSubjectGroup, schools, majors, selectedSchoolId, selectedMajorId
-=======
   loading?: boolean;
 }
 
@@ -38,7 +29,6 @@ const SubjectGroupModal: React.FC<Props> = ({
   selectedSchoolId, 
   selectedMajorId,
   loading = false
->>>>>>> temp-remote/main
 }) => (
   <Modal
     title={editingSubjectGroup ? 'Chỉnh sửa tổ hợp môn' : 'Thêm tổ hợp môn'}
@@ -47,11 +37,6 @@ const SubjectGroupModal: React.FC<Props> = ({
     onOk={() => form.submit()}
     okText={editingSubjectGroup ? 'Cập nhật' : 'Thêm'}
     cancelText="Hủy"
-<<<<<<< HEAD
-    destroyOnClose
-  >
-    <Form form={form} layout="vertical" onFinish={onOk}>
-=======
     confirmLoading={loading}
     destroyOnClose
   >
@@ -80,21 +65,10 @@ const SubjectGroupModal: React.FC<Props> = ({
         />
       </Form.Item>
 
->>>>>>> temp-remote/main
       <Form.Item
         name="schoolId"
         label="Trường"
         rules={[{ required: true, message: 'Vui lòng chọn trường' }]}
-<<<<<<< HEAD
-        initialValue={selectedSchoolId}
-      >
-        <Select disabled>
-          {schools.map((s) => (
-            <Option key={s.id} value={s.id}>{s.name}</Option>
-          ))}
-        </Select>
-      </Form.Item>
-=======
       >
         <Select disabled placeholder="Chọn trường">
           {schools.map((school) => (
@@ -105,27 +79,10 @@ const SubjectGroupModal: React.FC<Props> = ({
         </Select>
       </Form.Item>
 
->>>>>>> temp-remote/main
       <Form.Item
         name="majorId"
         label="Ngành"
         rules={[{ required: true, message: 'Vui lòng chọn ngành' }]}
-<<<<<<< HEAD
-        initialValue={selectedMajorId}
-      >
-        <Select disabled>
-          {majors.map((m) => (
-            <Option key={m.id} value={m.id}>{m.name}</Option>
-          ))}
-        </Select>
-      </Form.Item>
-      <Form.Item
-        name="name"
-        label="Tên tổ hợp môn"
-        rules={[{ required: true, message: 'Vui lòng nhập tên tổ hợp môn' }]}
-      >
-        <Input placeholder="Nhập tên tổ hợp môn" />
-=======
       >
         <Select disabled placeholder="Chọn ngành">
           {majors.map((major) => (
@@ -145,7 +102,6 @@ const SubjectGroupModal: React.FC<Props> = ({
         ]}
       >
         <Input placeholder="Ví dụ: Toán - Lý - Hóa" />
->>>>>>> temp-remote/main
       </Form.Item>
     </Form>
   </Modal>

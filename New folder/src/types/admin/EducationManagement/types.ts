@@ -2,13 +2,6 @@
 export interface School {
     id: string;
     name: string;
-<<<<<<< HEAD
-=======
-    adminEmail?: string;
-    adminPassword?: string;
-    adminName?: string;
-    adminPhone?: string;
->>>>>>> temp-remote/main
   }
   
   export interface Major {

@@ -35,26 +35,39 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, onLogout }) => {
     async function fetchUserData() {
       setLoadingUser(true);
       try {
-        const res = await fetch(`http://localhost:3000/api/user/${userId}`);
-        if (!res.ok) throw new Error('Không thể lấy thông tin người dùng');
+        // Lấy token từ localStorage
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('Chưa đăng nhập');
+        }
+
+        const res = await fetch('http://localhost:3000/api/auth/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!res.ok) {
+          throw new Error('Không thể lấy thông tin người dùng');
+        }
+
         const data = await res.json();
-        if (data.ten) setUsername(data.ten);
-        else setUsername('User');
+        
+        if (data.user && data.user.ten) {
+          setUsername(data.user.ten);
+        } else {
+          throw new Error('Không tìm thấy tên người dùng');
+        }
       } catch (error) {
-        message.error('Lấy tên người dùng thất bại');
-        setUsername('User');
+        console.error('Lỗi khi lấy thông tin người dùng:', error);
+        setUsername('Người dùng');
       } finally {
         setLoadingUser(false);
       }
     }
 
-    if (userId) {
-      fetchUserData();
-    } else {
-      setUsername('User');
-      setLoadingUser(false);
-    }
-  }, [userId]);
+    fetchUserData();
+  }, []);
 
   // 3. Thêm useEffect để gọi API thật
   useEffect(() => {

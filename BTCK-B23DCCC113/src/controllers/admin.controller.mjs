@@ -7,6 +7,8 @@ import AdmissionRule from '../models/AdmissionRule.model.mjs';
 import { filterAllProfiles } from '../services/admissionFilter.service.mjs';
 import { sendBulkAdmissionNotifications } from '../auth.mjs';
 import User from '../models/User.model.mjs'; // Thêm User model
+import Notification from '../models/Notification.model.mjs';
+import bcrypt from 'bcrypt'; // Thêm import bcrypt
 
 // Hàm helper để chuyển đổi tên phương thức
 function getMethodName(method) {
@@ -32,11 +34,56 @@ export const getSchools = async (req, res) => {
 
 export const addSchool = async (req, res) => {
     try {
-        const { id, name } = req.body;
+        const { id, name, adminEmail, adminPassword, adminName, adminPhone } = req.body;
+        
+        console.log('🔵 Bắt đầu thêm trường với dữ liệu:', { id, name, adminEmail, adminName, adminPhone });
+
+        // Tạo trường học mới
         const school = new School({ id, name });
         await school.save();
-        res.status(201).json(school);
+        console.log('✅ Đã tạo trường học thành công:', school.name);
+
+        // Tạo tài khoản admin cho trường
+        if (adminEmail && adminPassword && adminName && adminPhone) {
+            console.log('🔵 Đang tạo tài khoản admin cho trường...');
+            try {
+                // Kiểm tra xem email hoặc số điện thoại admin đã tồn tại chưa
+                const existingUser = await User.findOne({ $or: [{ email: adminEmail }, { sdt: adminPhone }] });
+                if (existingUser) {
+                    await School.findOneAndDelete({ id: id }); // Xóa trường vừa tạo nếu không thể tạo admin
+                    console.error(`❌ Lỗi: Email (${adminEmail}) hoặc số điện thoại (${adminPhone}) đã được đăng ký.`);
+                    return res.status(400).json({ message: 'Email hoặc số điện thoại admin đã được đăng ký.' });
+                }
+
+                // Mã hóa mật khẩu
+                const hashedPassword = await bcrypt.hash(adminPassword, 10);
+
+                const adminUser = new User({
+                    ten: adminName,
+                    email: adminEmail,
+                    password: hashedPassword, // Sử dụng mật khẩu đã mã hóa
+                    sdt: adminPhone,
+                    role: 'schoolAdmin',
+                    schoolId: id
+                });
+                await adminUser.save();
+                console.log('✅ Đã tạo tài khoản admin thành công cho:', adminUser.email);
+            } catch (userError) {
+                console.error('❌ Lỗi khi tạo tài khoản admin:', userError.message);
+                // Nếu không tạo được user, bạn có thể muốn xóa trường vừa tạo
+                await School.findOneAndDelete({ id: id }); 
+                return res.status(400).json({ message: 'Tạo trường thành công nhưng không tạo được admin', error: userError.message });
+            }
+        } else {
+            console.log('⚠️ Thiếu thông tin admin, bỏ qua tạo tài khoản admin.', { adminEmail, adminPassword: adminPassword ? '******' : 'N/A', adminName, adminPhone });
+        }
+
+        res.status(201).json({
+            school,
+            message: 'Tạo trường học và tài khoản admin (nếu có đủ thông tin) thành công'
+        });
     } catch (error) {
+        console.error('❌ Lỗi tổng quát trong addSchool:', error.message);
         res.status(400).json({ message: error.message });
     }
 };
@@ -852,115 +899,413 @@ export const getAdmissionRuleByMethod = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-import Notification from '../models/Notification.mjs';
 
-// Tạo thông báo mới
+// Các chức năng quản lý thông báo
 export const createNotification = async (req, res) => {
-  try {
-    const { title, content, description } = req.body;
-    
-    const notification = new Notification({
-      title,
-      content,
-      description
-    });
+    try {
+        const {
+            title,
+            content,
+            type = 'normal',
+            scheduledFor,
+            visibility = 'all_users',
+            targetAudience,
+            targetRoles,
+            isPinned = false,
+            expiresAt,
+            metadata
+        } = req.body;
 
-    await notification.save();
-    
-    res.status(201).json({
-      success: true,
-      message: 'Thông báo đã được tạo thành công',
-      data: notification
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: 'Không thể tạo thông báo',
-      error: error.message
-    });
-  }
+        // Kiểm tra các trường bắt buộc
+        if (!title || !content) {
+            return res.status(400).json({
+                success: false,
+                message: 'Tiêu đề và nội dung là bắt buộc'
+            });
+        }
+
+        // Tạo đối tượng thông báo
+        const notification = new Notification({
+            title,
+            content,
+            sender: req.user._id, // Admin tạo thông báo
+            type,
+            isPinned,
+            scheduledFor,
+            expiresAt,
+            status: scheduledFor ? 'scheduled' : 'published',
+            visibility,
+            targetAudience,
+            targetRoles,
+            metadata,
+            publishedAt: scheduledFor ? null : new Date()
+        });
+
+        await notification.save();
+
+        return res.status(201).json({
+            success: true,
+            message: 'Tạo thông báo thành công',
+            data: notification
+        });
+    } catch (error) {
+        console.error('Lỗi khi tạo thông báo:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Lỗi server',
+            error: error.message
+        });
+    }
 };
 
-// Lấy danh sách tất cả thông báo
-export const getAllNotifications = async (req, res) => {
-  try {
-    const notifications = await Notification.find()
-      .sort({ createdAt: -1 }); // Sắp xếp theo thời gian tạo mới nhất
-    
-    res.status(200).json({
-      success: true,
-      count: notifications.length,
-      data: notifications
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: 'Không thể lấy danh sách thông báo',
-      error: error.message
-    });
-  }
-};
-
-// Cập nhật thông báo
 export const updateNotification = async (req, res) => {
-  try {
-    const { title, content, description } = req.body;
-    
-    const notification = await Notification.findByIdAndUpdate(
-      req.params.id,
-      {
-        title,
-        content,
-        description
-      },
-      {
-        new: true,
-        runValidators: true
-      }
-    );
+    try {
+        const { id } = req.params;
+        const updateData = req.body;
 
-    if (!notification) {
-      return res.status(404).json({
-        success: false,
-        message: 'Không tìm thấy thông báo'
-      });
+        // Tìm và cập nhật thông báo
+        const notification = await Notification.findById(id);
+        
+        if (!notification) {
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy thông báo'
+            });
+        }
+
+        // Không cho phép cập nhật một số trường nếu thông báo đã được đăng
+        if (notification.status === 'published') {
+            delete updateData.scheduledFor;
+            delete updateData.status;
+        }
+
+        // Cập nhật thông báo
+        Object.assign(notification, updateData);
+        await notification.save();
+
+        return res.status(200).json({
+            success: true,
+            message: 'Cập nhật thông báo thành công',
+            data: notification
+        });
+    } catch (error) {
+        console.error('Lỗi khi cập nhật thông báo:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Lỗi server',
+            error: error.message
+        });
     }
-
-    res.status(200).json({
-      success: true,
-      message: 'Thông báo đã được cập nhật thành công',
-      data: notification
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: 'Không thể cập nhật thông báo',
-      error: error.message
-    });
-  }
 };
 
-// Xóa thông báo
-export const deleteNotification = async (req, res) => {
-  try {
-    const notification = await Notification.findByIdAndDelete(req.params.id);
+export const togglePinNotification = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const notification = await Notification.findById(id);
+        
+        if (!notification) {
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy thông báo'
+            });
+        }
 
-    if (!notification) {
-      return res.status(404).json({
-        success: false,
-        message: 'Không tìm thấy thông báo'
-      });
+        notification.isPinned = !notification.isPinned;
+        await notification.save();
+
+        return res.status(200).json({
+            success: true,
+            message: `Đã ${notification.isPinned ? 'ghim' : 'bỏ ghim'} thông báo thành công`,
+            data: notification
+        });
+    } catch (error) {
+        console.error('Lỗi khi thay đổi trạng thái ghim:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Lỗi server',
+            error: error.message
+        });
     }
+};
 
-    res.status(200).json({
-      success: true,
-      message: 'Thông báo đã được xóa thành công'
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: 'Không thể xóa thông báo',
-      error: error.message
-    });
-  }
-}; 
+export const deleteNotification = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const notification = await Notification.findById(id);
+        
+        if (!notification) {
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy thông báo'
+            });
+        }
+
+        await notification.deleteOne();
+
+        return res.status(200).json({
+            success: true,
+            message: 'Xóa thông báo thành công'
+        });
+    } catch (error) {
+        console.error('Lỗi khi xóa thông báo:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Lỗi server',
+            error: error.message
+        });
+    }
+};
+
+export const getAdminNotifications = async (req, res) => {
+    try {
+        const {
+            page = 1,
+            limit = 10,
+            status,
+            type,
+            isPinned
+        } = req.query;
+
+        const query = {};
+        
+        if (status) query.status = status;
+        if (type) query.type = type;
+        if (isPinned !== undefined) query.isPinned = isPinned;
+
+        const options = {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            sort: { isPinned: -1, createdAt: -1 },
+            populate: 'sender'
+        };
+
+        const notifications = await Notification.paginate(query, options);
+
+        return res.status(200).json({
+            success: true,
+            data: notifications
+        });
+    } catch (error) {
+        console.error('Lỗi khi lấy danh sách thông báo:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Lỗi server',
+            error: error.message
+        });
+    }
+};
+
+// --- QUẢN LÝ NGƯỜI DÙNG (ADMIN) ---
+export const addUser = async (req, res) => {
+    try {
+        const { ten, sdt, email, password, role, schoolId } = req.body;
+
+        // Kiểm tra các trường bắt buộc
+        if (!ten || !sdt || !email || !password || !role) {
+            return res.status(400).json({ message: 'Thiếu thông tin bắt buộc (tên, SĐT, email, mật khẩu, vai trò).' });
+        }
+
+        // Validate số điện thoại và email
+        const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/;
+        if (!phoneRegex.test(sdt)) {
+            return res.status(400).json({ message: 'Số điện thoại không hợp lệ!' });
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ message: 'Email không hợp lệ!' });
+        }
+        if (password.length < 6) {
+            return res.status(400).json({ message: 'Mật khẩu phải có ít nhất 6 ký tự!' });
+        }
+
+        // Kiểm tra trùng lặp
+        const existingUser = await User.findOne({ $or: [{ sdt }, { email }] });
+        if (existingUser) {
+            return res.status(400).json({ message: 'Số điện thoại hoặc email đã được đăng ký!' });
+        }
+
+        // Mã hóa mật khẩu
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Tạo user mới
+        const newUser = new User({
+            ten,
+            sdt,
+            email,
+            password: hashedPassword,
+            role,
+            schoolId: role === 'schoolAdmin' ? schoolId : undefined // Chỉ gán schoolId nếu là schoolAdmin
+        });
+
+        await newUser.save();
+
+        res.status(201).json({
+            message: 'Tạo tài khoản người dùng thành công!',
+            user: {
+                _id: newUser._id,
+                ten: newUser.ten,
+                email: newUser.email,
+                role: newUser.role,
+                schoolId: newUser.schoolId
+            }
+        });
+
+    } catch (error) {
+        console.error('❌ Lỗi khi tạo người dùng:', error);
+        res.status(500).json({ message: 'Lỗi server khi tạo người dùng', error: error.message });
+    }
+};
+
+// --- QUẢN LÝ TÀI KHOẢN ADMIN TRƯỜNG ---
+export const createSchoolAdmin = async (req, res) => {
+    try {
+        const { schoolId, email, password, name, phone } = req.body;
+
+        // Kiểm tra các trường bắt buộc
+        if (!schoolId || !email || !password || !name || !phone) {
+            return res.status(400).json({ message: 'Thiếu thông tin bắt buộc' });
+        }
+
+        // Kiểm tra trường có tồn tại
+        const school = await School.findOne({ id: schoolId });
+        if (!school) {
+            return res.status(404).json({ message: 'Không tìm thấy trường học' });
+        }
+
+        // Validate email và số điện thoại
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ message: 'Email không hợp lệ' });
+        }
+
+        const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/;
+        if (!phoneRegex.test(phone)) {
+            return res.status(400).json({ message: 'Số điện thoại không hợp lệ' });
+        }
+
+        // Kiểm tra trùng lặp
+        const existingUser = await User.findOne({ 
+            $or: [{ email }, { sdt: phone }] 
+        });
+        if (existingUser) {
+            return res.status(400).json({ message: 'Email hoặc số điện thoại đã được sử dụng' });
+        }
+
+        // Mã hóa mật khẩu
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Tạo tài khoản admin mới
+        const newAdmin = new User({
+            ten: name,
+            email: email,
+            sdt: phone,
+            password: hashedPassword,
+            role: 'schoolAdmin',
+            schoolId: schoolId
+        });
+
+        await newAdmin.save();
+
+        res.status(201).json({
+            message: 'Tạo tài khoản admin trường thành công',
+            admin: {
+                id: newAdmin._id,
+                name: newAdmin.ten,
+                email: newAdmin.email,
+                phone: newAdmin.sdt,
+                schoolId: newAdmin.schoolId,
+                role: newAdmin.role
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export const getSchoolAdmins = async (req, res) => {
+    try {
+        const { schoolId } = req.query;
+        
+        let query = { role: 'schoolAdmin' };
+        if (schoolId) {
+            query.schoolId = schoolId;
+        }
+
+        const admins = await User.find(query).select('-password');
+        
+        // Lấy thông tin trường cho mỗi admin
+        const adminsWithSchoolInfo = await Promise.all(admins.map(async (admin) => {
+            const school = await School.findOne({ id: admin.schoolId });
+            return {
+                id: admin._id,
+                name: admin.ten,
+                email: admin.email,
+                phone: admin.sdt,
+                schoolId: admin.schoolId,
+                schoolName: school ? school.name : 'Không xác định',
+                role: admin.role,
+                createdAt: admin.createdAt
+            };
+        }));
+
+        res.json(adminsWithSchoolInfo);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Lấy hồ sơ theo trường
+export const getSchoolProfiles = async (req, res) => {
+    try {
+        const { schoolId } = req.params;
+        const { trangThai, phuongThuc, nganh, page = 1, limit = 20 } = req.query;
+        
+        // Tạm thời bỏ qua kiểm tra quyền truy cập
+        // if (req.user.role !== 'schoolAdmin' || req.user.schoolId !== schoolId) {
+        //     return res.status(403).json({ message: 'Không có quyền truy cập hồ sơ của trường này' });
+        // }
+
+        let query = { truong: schoolId };
+        
+        if (trangThai) query.trangThai = trangThai;
+        if (phuongThuc) query.phuongThuc = phuongThuc;
+        if (nganh) query.maNganh = nganh;
+        
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+        
+        const [profiles, total] = await Promise.all([
+            Profile.find(query)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(parseInt(limit)),
+            Profile.countDocuments(query)
+        ]);
+
+        // Lấy thông tin ngành học
+        const majors = await Major.find({ schoolId });
+        const majorMap = {};
+        majors.forEach(major => {
+            majorMap[major.id] = major.name;
+        });
+
+        // Thêm tên ngành vào kết quả
+        const profilesWithMajorName = profiles.map(profile => ({
+            ...profile.toObject(),
+            tenNganh: majorMap[profile.maNganh] || profile.maNganh
+        }));
+        
+        res.json({
+            profiles: profilesWithMajorName,
+            pagination: {
+                currentPage: parseInt(page),
+                totalPages: Math.ceil(total / parseInt(limit)),
+                totalItems: total,
+                itemsPerPage: parseInt(limit)
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};

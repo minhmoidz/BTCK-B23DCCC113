@@ -10,6 +10,7 @@ const userMenuItems = [
   { key: 'settings', icon: <SettingOutlined />, label: 'Cài đặt' },
   { type: 'divider' },
   { key: 'logout', icon: <LogoutOutlined />, label: 'Đăng xuất', danger: true },
+
 ];
 
 const UserMenu = () => {
@@ -28,7 +29,7 @@ const UserMenu = () => {
           localStorage.removeItem('user');
           sessionStorage.clear();
           message.success('Đăng xuất thành công');
-          navigate('/login');
+          navigate('/');
         },
       });
     } else if (key === 'profile' || key === 'settings') {

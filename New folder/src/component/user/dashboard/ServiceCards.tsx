@@ -15,7 +15,7 @@ const cardData = [
     highlight: true,
   },
   {
-    title: 'Tra cứu kết quả trực tuyến',
+    title: 'Dự đoán kết quả xét tuyển',
     icon: <UserAddOutlined style={{ fontSize: 40, color: '#52c41a' }} />,
     desc: 'Tra cứu kết quả trực tuyến đại học nhanh nhất ',
     img: '/nhaphoc.png',

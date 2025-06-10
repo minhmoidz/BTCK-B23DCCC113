@@ -7,7 +7,6 @@ import XetTuyen from '../../pages/xettuyen/XetTuyen';
 import ThanhToan from '../../pages/thanhtoan/ThanhToan';
 import TheoDoiHoSoTraCuu from '../../pages/tracuu/TraCuu';
 import SimpleAuthPage from '../../component/login';
-import AllNotification from '../../pages/thongbao/AllNotification';
 import QuyCheThi from '../../pages/huongdan/QuyCheThi';
 import DangKy from '../../pages/huongdan/DangKy';
 import LePhi from '../../pages/huongdan/LePhi';
@@ -30,7 +29,7 @@ import THPTQGDiem from '../../pages/tracuu/THPTQG';
 import KinhNghiem from '../../pages/dien-dan/KinhNghiem';
 import HoiDap from '../../pages/dien-dan/HoiDap';
 import TinTuc from '../../pages/dien-dan/TinTuc';
-import NotificationDetail from '../../pages/thongbao/NotificationDetail';
+import AllNotification from '../../pages/thongbao/AllNotification';
 
 // Import các component Admin
 import ProfileManager from '../../pages/admin/ProfileManager';
@@ -41,7 +40,12 @@ import DetailedAdmissionRulesPage from '../../pages/admin/DetailedAdmissionRules
 import AdmissionManagement from '../../pages/admin/AdmissionManagement';
 import EducationManagement from '../../pages/admin/EducationManagement';
 import Chat from '../../component/admin/chat/Chat';
-import NotificationManagement from '../../pages/admin/NotificationManagerment';
+import NotificationManager from '../../pages/admin/NotificationManagerment';
+// Sửa import này - dùng SchoolAdminProfileManager thay vì SchoolAdminDashboard
+import SchoolAdminProfileManager from '../../pages/adminSchool/SchoolAdminProfileManager';
+import ProtectedRoute from '../../component/login/ProtectedRoute';
+import NotificationDetail from '../../pages/thongbao/NotificationDetail';
+import XetTuyenManager from '../../pages/admin/XetTuyenManager';
 
 interface RouterProps {
   loggedInUser: string | null;
@@ -92,16 +96,34 @@ const Router: React.FC<RouterProps> = ({ loggedInUser, onLogin, onLogout }) => (
       <Route path="/dien-dan/tin-tuc" element={<TinTuc />} />
 
       {/* Trang Admin với các route con */}
-      <Route path="/admin" element={<AdminLayout/>}>
+      <Route path="/admin" element={
+        loggedInUser ? (
+          <AdminLayout/>
+        ) : (
+          <Navigate to="/login" replace />
+        )
+      }>
         <Route index element={<DashboardAdmin />} />
         <Route path="chi-tieu" element={<AdmissionManagement />} />
-        <Route path="xet-tuyen" element={<EducationManagement/>} />
+        <Route path="xet-tuyen" element={<XetTuyenManager/>} />
+        <Route path="nganh-truong" element={<EducationManagement/>} />
         <Route path="ho-so" element={<ProfileManager />} />
         <Route path="cau-hinh" element={<DetailedAdmissionRulesPage />} />
         <Route path="chat" element={<Chat />} />
-        <Route path="thong-bao" element={<NotificationManagement />} />
-
+        <Route path="thong-bao" element={<NotificationManager />} />
       </Route>
+
+      {/* Route cho School Admin */}
+      <Route 
+        path="/school-admin" 
+        element={
+          loggedInUser ? (
+            <SchoolAdminProfileManager/>
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        } 
+      />
 
       {/* Trang Dashboard riêng biệt */}
       <Route
@@ -114,13 +136,12 @@ const Router: React.FC<RouterProps> = ({ loggedInUser, onLogin, onLogout }) => (
           )
         }
       />
-      {/* Các trang dịch vụ riêng biệt, không phải route con */}
+
+      {/* Các trang dịch vụ riêng biệt */}
       <Route
         path="/xettuyen"
         element={
-          loggedInUser ? <XetTuyen username={''} onLogout={function (): void {
-            throw new Error('Function not implemented.');
-          }} /> : <Navigate to="/login" replace />
+          loggedInUser ? <XetTuyen username={loggedInUser} onLogout={onLogout} /> : <Navigate to="/login" replace />
         }
       />
       <Route
@@ -135,6 +156,7 @@ const Router: React.FC<RouterProps> = ({ loggedInUser, onLogin, onLogout }) => (
           loggedInUser ? <ThanhToan /> : <Navigate to="/login" replace />
         }
       />
+      
       {/* Route fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

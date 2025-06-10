@@ -29,12 +29,23 @@ import {
     updateDetailedAdmissionRules,
     previewAdmissionRules,
     getAdmissionRuleByMethod,
-    createNotification,
-    updateNotification,
-    deleteNotification
+    addUser,
+    createSchoolAdmin,
+    getSchoolAdmins,
+    getSchoolProfiles
 } from '../../controllers/admin.controller.mjs';
 
 const router = express.Router();
+
+// --- API QUẢN LÝ NGƯỜI DÙNG ---
+router.post('/users', addUser);
+
+// --- API QUẢN LÝ TÀI KHOẢN ADMIN TRƯỜNG ---
+router.post('/school-accounts', createSchoolAdmin);
+router.get('/school-accounts', getSchoolAdmins);
+
+// --- API QUẢN LÝ HỒ SƠ THEO TRƯỜNG ---
+router.get('/schools/:schoolId/profiles', getSchoolProfiles);
 
 // Middleware xác thực admin cho tất cả routes
 router.use(isAdmin);
@@ -82,11 +93,6 @@ router.get('/admission-rules/template/:majorId', getAdmissionRuleTemplate);
 router.put('/admission-rules/detailed', updateDetailedAdmissionRules);
 router.post('/admission-rules/preview', previewAdmissionRules);
 router.get('/admission-rules/:schoolId/:majorId/:academicYear/:method', getAdmissionRuleByMethod);
-
-// --- API QUẢN LÝ THÔNG BÁO ---
-router.post('/notifications', createNotification);
-router.put('/notifications/:id', updateNotification);
-router.delete('/notifications/:id', deleteNotification);
 
 // Thêm route mới đã có trong controller
 router.post('/process-admission-complete', processAdmissionComplete);

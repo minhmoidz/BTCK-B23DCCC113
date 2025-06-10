@@ -172,7 +172,7 @@ const NotificationPage = () => {
                       >
                         <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
                           <img 
-                            src={notification.image ? `${API_URL}/${notification.image}` : '/default-news.png'} 
+                            src={notification.image ? ` http://localhost:3000/${notification.image}` : '/default-news.png'} 
                             alt={notification.title} 
                             style={{ 
                               width: '120px', 

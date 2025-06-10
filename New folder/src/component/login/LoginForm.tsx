@@ -1,75 +1,21 @@
-<<<<<<< HEAD
-import React from 'react';
-import { Form, Input, Button } from 'antd';
-=======
 import React, { useState } from 'react';
 import { Form, Input, Button, Segmented } from 'antd';
 import { UserOutlined, KeyOutlined, PhoneOutlined } from '@ant-design/icons';
 
 type LoginRole = 'user' | 'admin';
->>>>>>> temp-remote/main
 
 interface LoginFormProps {
   loading: boolean;
   onLogin: (sdt: string, password: string) => void;
   onRegister: () => void;
-<<<<<<< HEAD
-  goToAdminLogin: () => void;
-=======
   onAdminLogin?: (username: string, password: string) => void;
   goToAdminLogin?: () => void;
->>>>>>> temp-remote/main
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({
   loading,
   onLogin,
   onRegister,
-<<<<<<< HEAD
-  goToAdminLogin,
-}) => {
-  const [form] = Form.useForm();
-
-  const onFinish = (values: { sdt: string; password: string }) => {
-    onLogin(values.sdt, values.password);
-  };
-
-  return (
-    <Form form={form} layout="vertical" onFinish={onFinish}>
-      <Form.Item
-        label="Số điện thoại"
-        name="sdt"
-        rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }]}
-      >
-        <Input placeholder="Nhập số điện thoại" autoComplete="tel" />
-      </Form.Item>
-
-      <Form.Item
-        label="Mật khẩu"
-        name="password"
-        rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
-      >
-        <Input.Password placeholder="Nhập mật khẩu" autoComplete="current-password" />
-      </Form.Item>
-
-      <Form.Item>
-        <Button type="primary" htmlType="submit" loading={loading} block>
-          Đăng nhập
-        </Button>
-      </Form.Item>
-
-      <Form.Item>
-        <Button type="link" onClick={onRegister} block>
-          Chưa có tài khoản? Đăng ký
-        </Button>
-      </Form.Item>
-
-      <Form.Item>
-        <Button type="default" onClick={goToAdminLogin} block>
-          Đăng nhập Admin
-        </Button>
-      </Form.Item>
-=======
   onAdminLogin,
   goToAdminLogin,
 }) => {
@@ -227,13 +173,8 @@ const LoginForm: React.FC<LoginFormProps> = ({
           </div>
         </Form.Item>
       )}
->>>>>>> temp-remote/main
     </Form>
   );
 };
 
-<<<<<<< HEAD
 export default LoginForm;
-=======
-export default LoginForm;
->>>>>>> temp-remote/main

@@ -3,6 +3,7 @@ import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import User from './models/User.model.mjs';
+import School from './models/School.model.mjs';
 
 const router = express.Router();
 
@@ -332,6 +333,12 @@ router.post('/verify-registration', validateEmail, async (req, res) => {
  *                       type: string
  *                     email:
  *                       type: string
+ *                     role:
+ *                       type: string
+ *                     schoolId:
+ *                       type: string
+ *                     school:
+ *                       type: object
  *                 token:
  *                   type: string
  *       400:
@@ -357,11 +364,31 @@ router.post('/login', async (req, res) => {
     if (!passwordMatch) {
       return res.status(401).json({ message: 'Số điện thoại hoặc mật khẩu không chính xác!' });
     }
+
+    // Lấy thông tin trường nếu là admin trường
+    let schoolInfo = null;
+    if (user.role === 'schoolAdmin' && user.schoolId) {
+      const school = await School.findOne({ id: user.schoolId });
+      if (school) {
+        schoolInfo = {
+          id: school.id,
+          name: school.name
+        };
+      }
+    }
     
     res.status(200).json({
       message: 'Đăng nhập thành công!',
-      user: { id: user._id, ten: user.ten, sdt: user.sdt, email: user.email },
-      token: user._id // Trả về token (ở đây token chính là userId)
+      user: { 
+        id: user._id, 
+        ten: user.ten, 
+        sdt: user.sdt, 
+        email: user.email,
+        role: user.role,
+        schoolId: user.schoolId,
+        school: schoolInfo
+      },
+      token: user._id
     });
   } catch (error) {
     res.status(500).json({ message: 'Lỗi đăng nhập!', error: error.message });
