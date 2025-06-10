@@ -7,11 +7,7 @@ import XetTuyen from '../../pages/xettuyen/XetTuyen';
 import ThanhToan from '../../pages/thanhtoan/ThanhToan';
 import TheoDoiHoSoTraCuu from '../../pages/tracuu/TraCuu';
 import SimpleAuthPage from '../../component/login';
-<<<<<<< HEAD
 import AllNotification from '../../pages/thongbao/AllNotification';
-=======
-import NotificationPage from '../../pages/thongbao/NotificationPage';
->>>>>>> temp-remote/main
 import QuyCheThi from '../../pages/huongdan/QuyCheThi';
 import DangKy from '../../pages/huongdan/DangKy';
 import LePhi from '../../pages/huongdan/LePhi';
@@ -34,10 +30,7 @@ import THPTQGDiem from '../../pages/tracuu/THPTQG';
 import KinhNghiem from '../../pages/dien-dan/KinhNghiem';
 import HoiDap from '../../pages/dien-dan/HoiDap';
 import TinTuc from '../../pages/dien-dan/TinTuc';
-<<<<<<< HEAD
 import NotificationDetail from '../../pages/thongbao/NotificationDetail';
-=======
->>>>>>> temp-remote/main
 
 // Import các component Admin
 import ProfileManager from '../../pages/admin/ProfileManager';
@@ -48,14 +41,7 @@ import DetailedAdmissionRulesPage from '../../pages/admin/DetailedAdmissionRules
 import AdmissionManagement from '../../pages/admin/AdmissionManagement';
 import EducationManagement from '../../pages/admin/EducationManagement';
 import Chat from '../../component/admin/chat/Chat';
-<<<<<<< HEAD
 import NotificationManagement from '../../pages/admin/NotificationManagerment';
-=======
-import NotificationManager from '../../pages/admin/NotificationManager';
-// Sửa import này - dùng SchoolAdminProfileManager thay vì SchoolAdminDashboard
-import SchoolAdminProfileManager from '../../pages/adminSchool/SchoolAdminProfileManager';
-import ProtectedRoute from '../../component/login/ProtectedRoute';
->>>>>>> temp-remote/main
 
 interface RouterProps {
   loggedInUser: string | null;
@@ -80,12 +66,8 @@ const Router: React.FC<RouterProps> = ({ loggedInUser, onLogin, onLogout }) => (
       />
       <Route path="/major/:slug" element={<MajorDetail />} />
       <Route path="/chat" element={<ChatPage />} />
-<<<<<<< HEAD
       <Route path="/thong-bao" element={<AllNotification />} />
       <Route path="/thong-bao/:id" element={<NotificationDetail />} />
-=======
-      <Route path="/thong-bao" element={<NotificationPage />} />
->>>>>>> temp-remote/main
       <Route path="/huong-dan/quy-che-thi" element={<QuyCheThi />} />
       <Route path="/huong-dan/dang-ky" element={<DangKy />} />
       <Route path="/huong-dan/le-phi" element={<LePhi />} />
@@ -117,25 +99,10 @@ const Router: React.FC<RouterProps> = ({ loggedInUser, onLogin, onLogout }) => (
         <Route path="ho-so" element={<ProfileManager />} />
         <Route path="cau-hinh" element={<DetailedAdmissionRulesPage />} />
         <Route path="chat" element={<Chat />} />
-<<<<<<< HEAD
         <Route path="thong-bao" element={<NotificationManagement />} />
 
       </Route>
 
-=======
-        <Route path="qly-thong-bao" element={<NotificationManager />} />
-      </Route>
-
-      {/* Route cho School Admin - SỬA ĐÂY */}
-      <Route 
-        path="/school-admin" 
-        element={
-            <SchoolAdminProfileManager/>
-        } 
-      />
-
-
->>>>>>> temp-remote/main
       {/* Trang Dashboard riêng biệt */}
       <Route
         path="/dashboard"
@@ -147,7 +114,6 @@ const Router: React.FC<RouterProps> = ({ loggedInUser, onLogin, onLogout }) => (
           )
         }
       />
-<<<<<<< HEAD
       {/* Các trang dịch vụ riêng biệt, không phải route con */}
       <Route
         path="/xettuyen"
@@ -155,14 +121,6 @@ const Router: React.FC<RouterProps> = ({ loggedInUser, onLogin, onLogout }) => (
           loggedInUser ? <XetTuyen username={''} onLogout={function (): void {
             throw new Error('Function not implemented.');
           }} /> : <Navigate to="/login" replace />
-=======
-
-      {/* Các trang dịch vụ riêng biệt */}
-      <Route
-        path="/xettuyen"
-        element={
-          loggedInUser ? <XetTuyen username={loggedInUser} onLogout={onLogout} /> : <Navigate to="/login" replace />
->>>>>>> temp-remote/main
         }
       />
       <Route
@@ -177,10 +135,6 @@ const Router: React.FC<RouterProps> = ({ loggedInUser, onLogin, onLogout }) => (
           loggedInUser ? <ThanhToan /> : <Navigate to="/login" replace />
         }
       />
-<<<<<<< HEAD
-=======
-      
->>>>>>> temp-remote/main
       {/* Route fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

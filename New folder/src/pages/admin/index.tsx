@@ -10,11 +10,7 @@ import Test from './EducationManagement';
 import DetailedAdmissionRulesPage from './DetailedAdmissionRulesPage';
 import AdmissionManagement from './AdmissionManagement';
 import Chat from '../../component/admin/chat/Chat';
-<<<<<<< HEAD
-import NotificationManagement from './NotificationManagement';
-=======
-import NotificationManager from './NotificationManager';
->>>>>>> temp-remote/main
+import NotificationManagerment from './NotificationManagerment';
 
 const Admin = () => {
   return (
@@ -41,14 +37,6 @@ const Admin = () => {
               <ProfileManager />
             </AdminLayout>
           } />
-<<<<<<< HEAD
-=======
-          <Route path="/qly-thong-bao" element={
-            <AdminLayout>
-              <NotificationManager />
-            </AdminLayout>
-          } />
->>>>>>> temp-remote/main
           <Route path="/cau-hinh" element={
             <AdminLayout>
               <DetailedAdmissionRulesPage />
@@ -59,14 +47,11 @@ const Admin = () => {
               <Chat />
             </AdminLayout>
           } />
-<<<<<<< HEAD
           <Route path="/thong-bao" element={
             <AdminLayout>
-              <NotificationManagement />
+              <NotificationManagerment />
             </AdminLayout>
           } />
-=======
->>>>>>> temp-remote/main
         </Routes>
       </Router>
     </ConfigProvider>
