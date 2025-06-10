@@ -15,7 +15,7 @@ const Navbar: React.FC<NavbarProps> = ({ username, onLogout }) => {
   const navigate = useNavigate();
 
   const goToDashboard = () => {
-    navigate('/dashboard'); // Đường dẫn dashboard, bạn thay đổi nếu khác
+    navigate('/login'); // Đường dẫn dashboard, bạn thay đổi nếu khác
   };
 
   return (

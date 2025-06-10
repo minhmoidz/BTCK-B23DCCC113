@@ -41,7 +41,6 @@ const Dashboard: React.FC<DashboardProps> = ({ userId, onLogout }) => {
         if (data.ten) setUsername(data.ten);
         else setUsername('User');
       } catch (error) {
-        message.error('Lấy tên người dùng thất bại');
         setUsername('User');
       } finally {
         setLoadingUser(false);

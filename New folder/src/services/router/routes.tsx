@@ -41,6 +41,9 @@ import AdmissionManagement from '../../pages/admin/AdmissionManagement';
 import EducationManagement from '../../pages/admin/EducationManagement';
 import Chat from '../../component/admin/chat/Chat';
 import NotificationManager from '../../pages/admin/NotificationManager';
+// Sửa import này - dùng SchoolAdminProfileManager thay vì SchoolAdminDashboard
+import SchoolAdminProfileManager from '../../pages/adminSchool/SchoolAdminProfileManager';
+import ProtectedRoute from '../../component/login/ProtectedRoute';
 
 interface RouterProps {
   loggedInUser: string | null;
@@ -100,6 +103,15 @@ const Router: React.FC<RouterProps> = ({ loggedInUser, onLogin, onLogout }) => (
         <Route path="qly-thong-bao" element={<NotificationManager />} />
       </Route>
 
+      {/* Route cho School Admin - SỬA ĐÂY */}
+      <Route 
+        path="/school-admin" 
+        element={
+            <SchoolAdminProfileManager/>
+        } 
+      />
+
+
       {/* Trang Dashboard riêng biệt */}
       <Route
         path="/dashboard"
@@ -111,13 +123,12 @@ const Router: React.FC<RouterProps> = ({ loggedInUser, onLogin, onLogout }) => (
           )
         }
       />
-      {/* Các trang dịch vụ riêng biệt, không phải route con */}
+
+      {/* Các trang dịch vụ riêng biệt */}
       <Route
         path="/xettuyen"
         element={
-          loggedInUser ? <XetTuyen username={''} onLogout={function (): void {
-            throw new Error('Function not implemented.');
-          }} /> : <Navigate to="/login" replace />
+          loggedInUser ? <XetTuyen username={loggedInUser} onLogout={onLogout} /> : <Navigate to="/login" replace />
         }
       />
       <Route
@@ -132,6 +143,7 @@ const Router: React.FC<RouterProps> = ({ loggedInUser, onLogin, onLogout }) => (
           loggedInUser ? <ThanhToan /> : <Navigate to="/login" replace />
         }
       />
+      
       {/* Route fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
