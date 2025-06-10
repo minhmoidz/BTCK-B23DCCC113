@@ -1262,10 +1262,10 @@ export const getSchoolProfiles = async (req, res) => {
         const { schoolId } = req.params;
         const { trangThai, phuongThuc, nganh, page = 1, limit = 20 } = req.query;
         
-        // Kiểm tra quyền truy cập
-        if (req.user.role !== 'schoolAdmin' || req.user.schoolId !== schoolId) {
-            return res.status(403).json({ message: 'Không có quyền truy cập hồ sơ của trường này' });
-        }
+        // Tạm thời bỏ qua kiểm tra quyền truy cập
+        // if (req.user.role !== 'schoolAdmin' || req.user.schoolId !== schoolId) {
+        //     return res.status(403).json({ message: 'Không có quyền truy cập hồ sơ của trường này' });
+        // }
 
         let query = { truong: schoolId };
         
