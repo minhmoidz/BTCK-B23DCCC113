@@ -80,7 +80,9 @@ export function adminAuth(req, res, next) {
   console.log('Admin auth middleware bypassed');
   next();
 }
+
 export const isAdmin = (req, res, next) => {
+  console.log('isAdmin middleware bypassed');
   next();
 };
 
